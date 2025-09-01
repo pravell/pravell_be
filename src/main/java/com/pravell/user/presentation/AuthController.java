@@ -70,4 +70,23 @@ public class AuthController {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/refresh")
+    public ResponseEntity<TokenResponse> refresh(
+            @CookieValue(name = "refreshToken", required = false) String refreshToken,
+            HttpServletResponse httpServletResponse) {
+
+        TokenResponse rotated = authFacade.rotateRefreshAndIssueAccess(refreshToken);
+
+        ResponseCookie responseCookie = ResponseCookie.from("refreshToken", rotated.getRefreshToken())
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .sameSite("None")
+                .maxAge(Duration.ofDays(14))
+                .build();
+        httpServletResponse.addHeader("Set-Cookie", responseCookie.toString());
+
+        return ResponseEntity.ok(rotated);
+    }
+
 }

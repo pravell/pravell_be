@@ -7,6 +7,7 @@ import com.pravell.user.domain.exception.UserNotFoundException;
 import com.pravell.user.domain.model.User;
 import com.pravell.user.domain.repository.UserRepository;
 import java.util.Optional;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
@@ -48,8 +49,20 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public User findUser(String id) {
+    public User findUserByUserId(String id) {
         Optional<User> user = userRepository.findByUserId(id);
+
+        if (user.isEmpty()) {
+            log.warn("유저를 찾을 수 없습니다. Id : {}", id);
+            throw new UserNotFoundException("유저를 찾을 수 없습니다.");
+        }
+
+        return user.get();
+    }
+
+    @Transactional(readOnly = true)
+    public User findUserById(UUID id) {
+        Optional<User> user = userRepository.findById(id);
 
         if (user.isEmpty()) {
             log.warn("유저를 찾을 수 없습니다. Id : {}", id);
