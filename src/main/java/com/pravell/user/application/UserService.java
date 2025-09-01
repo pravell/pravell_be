@@ -1,9 +1,12 @@
 package com.pravell.user.application;
 
+import com.pravell.common.exception.InvalidCredentialsException;
 import com.pravell.user.application.dto.request.SignUpApplicationRequest;
 import com.pravell.user.domain.event.UserCreatedEvent;
+import com.pravell.user.domain.exception.UserNotFoundException;
 import com.pravell.user.domain.model.User;
 import com.pravell.user.domain.repository.UserRepository;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
@@ -42,6 +45,24 @@ public class UserService {
             throw new DuplicateKeyException("이미 존재하는 닉네임입니다.");
         }
 
+    }
+
+    @Transactional(readOnly = true)
+    public User findUser(String id) {
+        Optional<User> user = userRepository.findByUserId(id);
+
+        if (user.isEmpty()) {
+            log.warn("유저를 찾을 수 없습니다. Id : {}", id);
+            throw new UserNotFoundException("유저를 찾을 수 없습니다.");
+        }
+
+        return user.get();
+    }
+
+    public void verifyPassword(String rawPassword, String encodedPassword) {
+        if (!passwordEncoder.matches(rawPassword, encodedPassword)) {
+            throw new InvalidCredentialsException("비밀번호가 일치하지 않습니다.");
+        }
     }
 
 }

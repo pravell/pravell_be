@@ -1,8 +1,10 @@
 package com.pravell.user.application;
 
+import com.pravell.user.application.dto.request.SignInApplicationRequest;
 import com.pravell.user.application.dto.request.SignUpApplicationRequest;
 import com.pravell.user.application.dto.response.TokenResponse;
 import com.pravell.user.domain.event.UserCreatedEvent;
+import com.pravell.user.domain.model.User;
 import com.pravell.user.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +30,18 @@ public class AuthFacade {
         refreshTokenService.saveRefreshToken(userCreatedEvent.getUser().getId(), refreshToken);
 
         return new TokenResponse(accessToken, refreshToken);
+    }
+
+    public TokenResponse signIn(SignInApplicationRequest signInApplicationRequest) {
+        User user = userService.findUser(signInApplicationRequest.getId());
+        userService.verifyPassword(signInApplicationRequest.getPassword(), user.getPassword());
+
+        String newRefreshToken = jwtUtil.createRefreshToken(user);
+        refreshTokenService.updateToken(user.getId(), newRefreshToken);
+
+        String newAccessToken = jwtUtil.createAccessToken(user);
+
+        return new TokenResponse(newAccessToken, newRefreshToken);
     }
 
 }
