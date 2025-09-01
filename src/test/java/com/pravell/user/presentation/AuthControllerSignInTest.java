@@ -1,30 +1,32 @@
 package com.pravell.user.presentation;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.pravell.user.application.dto.response.TokenResponse;
 import com.pravell.user.domain.model.User;
-import com.pravell.user.domain.model.UserStatus;
+import com.pravell.user.domain.repository.RefreshTokenRepository;
 import com.pravell.user.domain.repository.UserRepository;
 import com.pravell.user.presentation.request.SignInRequest;
-import com.pravell.user.presentation.request.SignUpRequest;
 import java.util.Optional;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 @ActiveProfiles("test")
 @SpringBootTest
@@ -44,6 +46,9 @@ class AuthControllerSignInTest {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private RefreshTokenRepository refreshTokenRepository;
+
     @AfterEach
     void tearDown() {
         userRepository.deleteAllInBatch();
@@ -61,8 +66,11 @@ class AuthControllerSignInTest {
         String encodePassword = passwordEncoder.encode(request.getPassword());
         userRepository.save(User.createUser(request.getId(), encodePassword, "testUser").getUser());
 
+        Optional<User> user = userRepository.findByUserId(request.getId());
+        String oldRefreshToken = refreshTokenRepository.findByUserId(user.get().getId());
+
         //when, then
-        mockMvc.perform(
+        MvcResult mvcResult = mockMvc.perform(
                         post("/api/v1/auth/sign-in")
                                 .content(objectMapper.writeValueAsString(request))
                                 .contentType(MediaType.APPLICATION_JSON)
@@ -70,7 +78,24 @@ class AuthControllerSignInTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.accessToken").isNotEmpty())
-                .andExpect(jsonPath("$.refreshToken").isNotEmpty());
+                .andExpect(jsonPath("$.refreshToken").isNotEmpty())
+                .andExpect(header().string(HttpHeaders.SET_COOKIE, Matchers.notNullValue()))
+                .andReturn();
+
+        String json = mvcResult.getResponse().getContentAsString();
+        TokenResponse tokenResponse = objectMapper.readValue(json, TokenResponse.class);
+
+        String storedRefreshToken = refreshTokenRepository.findByUserId(user.get().getId());
+        assertThat(storedRefreshToken).isNotEqualTo(oldRefreshToken);
+        assertThat(storedRefreshToken).isEqualTo(tokenResponse.getRefreshToken());
+
+        String header = mvcResult.getResponse().getHeader(HttpHeaders.SET_COOKIE);
+        assertThat(header).contains("refreshToken=" + tokenResponse.getRefreshToken());
+        assertThat(header).contains("HttpOnly");
+        assertThat(header).contains("Secure");
+        assertThat(header).contains("Path=/");
+        assertThat(header).contains("SameSite=None");
+        assertThat(header).contains("Max-Age=1209600");
     }
 
     @DisplayName("id가 비어있으면 로그인에 실패한다.")
