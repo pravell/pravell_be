@@ -6,6 +6,7 @@ import com.pravell.user.application.dto.response.UserProfileResponse;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,6 +24,13 @@ public class UserController {
     public ResponseEntity<UserProfileResponse> getProfile(@RequestHeader("Authorization") String authorizationHeader){
         UUID id = commonJwtUtil.getUserIdFromToken(authorizationHeader);
         return ResponseEntity.ok(userService.getProfile(id));
+    }
+
+    @DeleteMapping("/me")
+    public ResponseEntity<Void> withDrawUser(@RequestHeader("Authorization") String authorizationHeader){
+        UUID id = commonJwtUtil.getUserIdFromToken(authorizationHeader);
+        userService.withDrawUser(id);
+        return ResponseEntity.noContent().build();
     }
 
 }

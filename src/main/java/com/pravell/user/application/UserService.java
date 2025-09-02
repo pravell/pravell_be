@@ -90,4 +90,9 @@ public class UserService {
                 .build();
     }
 
+    @Transactional
+    public void withDrawUser(UUID id) {
+        User user = findUserById(id);
+        user.withdraw();
+    }
 }

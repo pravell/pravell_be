@@ -14,6 +14,7 @@ import com.pravell.user.domain.model.UserStatus;
 import com.pravell.user.domain.repository.UserRepository;
 import java.util.Optional;
 import java.util.UUID;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,11 @@ class UserServiceTest {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @AfterEach
+    void tearDown() {
+        userRepository.deleteAllInBatch();
+    }
 
     @DisplayName("유저 저장에 성공하면 UserCreatedEvent를 반환한다.")
     @Test
@@ -103,6 +109,34 @@ class UserServiceTest {
     void shouldThrowException_whenUserNotFound() {
         //when, then
         assertThatThrownBy(()->userService.getProfile(UUID.randomUUID()))
+                .isInstanceOf(UserNotFoundException.class)
+                .hasMessage("유저를 찾을 수 없습니다.");
+    }
+
+    @DisplayName("유저 탈퇴에 성공한다.")
+    @Test
+    void shouldWithdrawUserSuccessfully() throws Exception {
+        //given
+        User user = User.createUser("userId", "passwordTest", "nickname").getUser();
+        userRepository.save(user);
+
+        assertThat(user.getStatus()).isEqualTo(UserStatus.ACTIVE);
+
+        //when
+        userService.withDrawUser(user.getId());
+
+        //then
+        Optional<User> afterUser = userRepository.findById(user.getId());
+
+        assertThat(afterUser).isPresent();
+        assertThat(afterUser.get().getStatus()).isEqualTo(UserStatus.WITHDRAWN);
+    }
+
+    @DisplayName("유저 탈퇴시 해당 유저가 존재하지 않으면 에외를 반환한다.")
+    @Test
+    void shouldThrowException_whenWithdrawingNonExistentUser() {
+        //when, then
+        assertThatThrownBy(()->userService.withDrawUser(UUID.randomUUID()))
                 .isInstanceOf(UserNotFoundException.class)
                 .hasMessage("유저를 찾을 수 없습니다.");
     }

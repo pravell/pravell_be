@@ -1,5 +1,7 @@
 package com.pravell.user.presentation;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -15,8 +17,10 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import java.time.Instant;
 import java.util.Date;
+import java.util.Optional;
 import java.util.UUID;
 import javax.crypto.SecretKey;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +51,11 @@ class UserControllerTest {
 
     @Value("${jwt.secret-key}")
     private String secretKey;
+
+    @AfterEach
+    void tearDown() {
+        userRepository.deleteAllInBatch();
+    }
 
     @DisplayName("로그인한 유저의 프로필 정보를 조회한다.")
     @Test
@@ -118,6 +127,94 @@ class UserControllerTest {
     @DisplayName("accessToken이 아닐 경우 프로필 정보 조회에 실패하고, 401을 반환한다.")
     @Test
     void shouldReturnUnauthorized_whenAccessTokenIsMissingOrInvalid() throws Exception {
+        //given
+        User user = User.createUser("userId", "passwordTest", "nickname").getUser();
+        userRepository.save(user);
+
+        String token = buildToken(user.getId(), "refresh", issuer, Instant.now().minusSeconds(1));
+
+        //when, then
+        mockMvc.perform(
+                        get("/api/v1/users/me")
+                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("Unauthorized"))
+                .andExpect(jsonPath("$.message").value("토큰이 올바르지 않습니다."))
+                .andReturn();
+    }
+
+    @DisplayName("유저 탈퇴에 성공한다.")
+    @Test
+    void shouldWithdrawUserSuccessfully() throws Exception {
+        //given
+        User user = User.createUser("userId", "passwordTest", "nickname").getUser();
+        userRepository.save(user);
+
+        assertThat(user.getStatus()).isEqualTo(UserStatus.ACTIVE);
+
+        String token = buildToken(user.getId(), "access", issuer, Instant.now().plusSeconds(1000));
+
+        //when
+        mockMvc.perform(
+                        delete("/api/v1/users/me")
+                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andExpect(status().isNoContent());
+
+        //then
+        Optional<User> afterUser = userRepository.findById(user.getId());
+        assertThat(afterUser).isPresent();
+        assertThat(afterUser.get().getStatus()).isEqualTo(UserStatus.WITHDRAWN);
+    }
+
+    @DisplayName("토큰에 해당하는 유저가 존재하지 않을 경우 404를 반환한다.")
+    @Test
+    void shouldReturn404_whenUserDoesNotExistForGivenToken() throws Exception {
+        //given
+        String token = buildToken(UUID.randomUUID(), "access", issuer, Instant.now().plusSeconds(1000));
+
+        //when, then
+        mockMvc.perform(
+                        delete("/api/v1/users/me")
+                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("Not Found"))
+                .andExpect(jsonPath("$.message").value("유저를 찾을 수 없습니다."));
+    }
+
+    @DisplayName("accessToken이 만료되었으면 탈퇴에 실패하고, 401을 반환한다.")
+    @Test
+    void shouldReturn401Unauthorized_whenAccessTokenIsExpired() throws Exception {
+        //given
+        User user = User.createUser("userId", "passwordTest", "nickname").getUser();
+        userRepository.save(user);
+
+        String token = buildToken(user.getId(), "access", issuer, Instant.now().minusSeconds(1));
+
+        //when, then
+        mockMvc.perform(
+                        delete("/api/v1/users/me")
+                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("Unauthorized"))
+                .andExpect(jsonPath("$.message").value("토큰이 올바르지 않습니다."))
+                .andReturn();
+    }
+
+    @DisplayName("accessToken이 아닐 경우 탈퇴에 실패하고, 401을 반환한다.")
+    @Test
+    void shouldFailWithdrawal_whenAccessTokenInvalid() throws Exception {
         //given
         User user = User.createUser("userId", "passwordTest", "nickname").getUser();
         userRepository.save(user);
