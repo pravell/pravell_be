@@ -2,6 +2,7 @@ package com.pravell.user.application;
 
 import com.pravell.common.exception.InvalidCredentialsException;
 import com.pravell.user.application.dto.request.SignUpApplicationRequest;
+import com.pravell.user.application.dto.request.UpdateUserApplicationRequest;
 import com.pravell.user.application.dto.response.UserProfileResponse;
 import com.pravell.user.domain.event.UserCreatedEvent;
 import com.pravell.user.domain.exception.UserNotFoundException;
@@ -95,5 +96,29 @@ public class UserService {
     public void withDrawUser(UUID id) {
         User user = findUserById(id);
         user.withdraw();
+        log.info("유저 탈퇴. Id : {}", id);
     }
+
+    @Transactional
+    public UserProfileResponse updateUser(UUID id, UpdateUserApplicationRequest updateUserApplicationRequest) {
+        User user = findUserById(id);
+        log.info("유저 업데이트. Id : {}, nicknameBefore : {}, nicknameAfter : {}",
+                id, user.getNickname(), updateUserApplicationRequest.getNickname());
+
+        if (userRepository.existsByNickname(updateUserApplicationRequest.getNickname())){
+            throw new DuplicateKeyException("이미 존재하는 닉네임입니다.");
+        }
+
+        if (updateUserApplicationRequest.getNickname() != null &&
+                !user.getNickname().equals(updateUserApplicationRequest.getNickname())) {
+            user.updateNickname(updateUserApplicationRequest.getNickname());
+        }
+
+        return UserProfileResponse.builder()
+                .userId(user.getUserId())
+                .nickname(user.getNickname())
+                .status(user.getStatus())
+                .build();
+    }
+
 }

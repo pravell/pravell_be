@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.pravell.common.exception.InvalidCredentialsException;
 import com.pravell.user.application.dto.request.SignUpApplicationRequest;
+import com.pravell.user.application.dto.request.UpdateUserApplicationRequest;
 import com.pravell.user.application.dto.response.UserProfileResponse;
 import com.pravell.user.domain.event.UserCreatedEvent;
 import com.pravell.user.domain.exception.UserNotFoundException;
@@ -19,6 +20,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -215,6 +217,54 @@ class UserServiceTest {
         assertThatThrownBy(()->userService.withDrawUser(UUID.randomUUID()))
                 .isInstanceOf(UserNotFoundException.class)
                 .hasMessage("유저를 찾을 수 없습니다.");
+    }
+
+    @DisplayName("유저 정보가 성공적으로 업데이트된다.")
+    @Test
+    void shouldUpdateUserInfoSuccessfully() {
+        //given
+        User user = User.createUser("userId", "passwordd", "nickname").getUser();
+        userRepository.save(user);
+
+        UpdateUserApplicationRequest request = UpdateUserApplicationRequest.builder()
+                .nickname("업데이트 할 닉네임")
+                .build();
+
+        Optional<User> beforeUser = userRepository.findById(user.getId());
+        assertThat(beforeUser).isPresent();
+        assertThat(beforeUser.get().getNickname()).isEqualTo(user.getNickname());
+        assertThat(beforeUser.get().getNickname()).isNotEqualTo(request.getNickname());
+
+        //when
+        UserProfileResponse updateUser = userService.updateUser(user.getId(), request);
+
+        //then
+        Optional<User> afterUser = userRepository.findById(user.getId());
+        assertThat(afterUser).isPresent();
+        assertThat(afterUser.get().getNickname()).isNotEqualTo(user.getNickname());
+        assertThat(afterUser.get().getNickname()).isEqualTo(request.getNickname());
+        assertThat(updateUser.getNickname()).isEqualTo(request.getNickname());
+        assertThat(updateUser.getNickname()).isEqualTo(afterUser.get().getNickname());
+    }
+
+    @DisplayName("해당 닉네임이 이미 존재하면 업데이트에 실패하고, 409를 반환한다.")
+    @Test
+    void shouldFailToUpdateNickname_whenNicknameAlreadyExists() {
+        //given
+        User already = User.createUser("userIdddd", "passwordd", "already").getUser();
+        userRepository.save(already);
+
+        User user = User.createUser("userId", "passwordd", "nickname").getUser();
+        userRepository.save(user);
+
+        UpdateUserApplicationRequest request = UpdateUserApplicationRequest.builder()
+                .nickname(already.getNickname())
+                .build();
+
+        //when, then
+        assertThatThrownBy(()->userService.updateUser(user.getId(), request))
+                .isInstanceOf(DuplicateKeyException.class)
+                .hasMessage("이미 존재하는 닉네임입니다.");
     }
 
 }

@@ -55,4 +55,7 @@ public class User extends AggregateRoot {
         return new UserCreatedEvent(user, ZonedDateTime.now());
     }
 
+    public void updateNickname(String nickname) {
+        this.nickname = nickname;
+    }
 }
