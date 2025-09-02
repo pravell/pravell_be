@@ -8,51 +8,25 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.pravell.ControllerTestSupport;
 import com.pravell.user.domain.model.User;
 import com.pravell.user.domain.model.UserStatus;
 import com.pravell.user.domain.repository.UserRepository;
 import com.pravell.user.presentation.request.UpdateUserRequest;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.Jwts.SIG;
-import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.security.Keys;
 import java.time.Instant;
-import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
-import javax.crypto.SecretKey;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MockMvc;
 
-@ActiveProfiles("test")
-@SpringBootTest
-@AutoConfigureMockMvc
-class UserControllerTest {
-
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
+class UserControllerTest extends ControllerTestSupport {
 
     @Autowired
     private UserRepository userRepository;
-
-    @Value("${jwt.issuer}")
-    private String issuer;
-
-    @Value("${jwt.secret-key}")
-    private String secretKey;
 
     @AfterEach
     void tearDown() {
@@ -732,20 +706,6 @@ class UserControllerTest {
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value("Not Found"))
                 .andExpect(jsonPath("$.message").value("유저를 찾을 수 없습니다."));
-    }
-
-    private String buildToken(UUID userId, String typ, String iss, Instant exp) {
-        SecretKey key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
-
-        return Jwts.builder()
-                .subject(userId.toString())
-                .issuer(iss)
-                .claim("userId", userId.toString())
-                .claim("typ", typ)
-                .expiration(Date.from(exp))
-                .issuedAt(new Date())
-                .signWith(key, SIG.HS256)
-                .compact();
     }
 
 }

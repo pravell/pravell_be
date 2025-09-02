@@ -1,0 +1,33 @@
+package com.pravell.plan.domain.model;
+
+import com.pravell.common.domain.BaseEntity;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import java.time.ZonedDateTime;
+import java.util.UUID;
+
+@Entity
+@Table(name = "plan_invite_codes")
+public class PlanInviteCode extends BaseEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(columnDefinition = "BINARY(16)", nullable = false)
+    private UUID plan_id;
+
+    @Column(unique = true, nullable = false)
+    private String code;
+
+    @Column(nullable = false)
+    private UUID createdBy;
+
+    @Column(nullable = false)
+    private ZonedDateTime expiresAt;
+
+}
