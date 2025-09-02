@@ -104,9 +104,85 @@ class UserServiceTest {
         assertThat(profile.getStatus()).isEqualTo(UserStatus.ACTIVE);
     }
 
-    @DisplayName("유저 정보 조회시 해당 유저가 존재하지 않으면 에외를 반환한다.")
+    @DisplayName("유저 정보 조회시 해당 유저가 존재하지 않으면 예외를 반환한다.")
     @Test
     void shouldThrowException_whenUserNotFound() {
+        //when, then
+        assertThatThrownBy(()->userService.getProfile(UUID.randomUUID()))
+                .isInstanceOf(UserNotFoundException.class)
+                .hasMessage("유저를 찾을 수 없습니다.");
+    }
+
+    @DisplayName("유저 정보 조회시 해당 유저가 이미 탈퇴한 유저라면 예외를 반환한다.")
+    @Test
+    void shouldThrowException_whenWithdrawnUserTriesToGetProfile() {
+        //given
+        User user = User.builder()
+                .id(UUID.randomUUID())
+                .userId("userId")
+                .password("passwordd")
+                .nickname("nickname")
+                .status(UserStatus.WITHDRAWN)
+                .build();
+        userRepository.save(user);
+
+        //when, then
+        assertThatThrownBy(()->userService.getProfile(UUID.randomUUID()))
+                .isInstanceOf(UserNotFoundException.class)
+                .hasMessage("유저를 찾을 수 없습니다.");
+    }
+
+    @DisplayName("유저 정보 조회시 해당 유저가 이미 삭제된 유저라면 예외를 반환한다.")
+    @Test
+    void shouldThrowException_whenDeletedUserTriesToGetProfile() {
+        //given
+        User user = User.builder()
+                .id(UUID.randomUUID())
+                .userId("userId")
+                .password("passwordd")
+                .nickname("nickname")
+                .status(UserStatus.DELETED)
+                .build();
+        userRepository.save(user);
+
+        //when, then
+        assertThatThrownBy(()->userService.getProfile(UUID.randomUUID()))
+                .isInstanceOf(UserNotFoundException.class)
+                .hasMessage("유저를 찾을 수 없습니다.");
+    }
+
+    @DisplayName("유저 정보 조회시 해당 유저가 이미 정지된 유저라면 예외를 반환한다.")
+    @Test
+    void shouldThrowException_whenSuspendedUserTriesToGetProfile() {
+        //given
+        User user = User.builder()
+                .id(UUID.randomUUID())
+                .userId("userId")
+                .password("passwordd")
+                .nickname("nickname")
+                .status(UserStatus.SUSPENDED)
+                .build();
+        userRepository.save(user);
+
+        //when, then
+        assertThatThrownBy(()->userService.getProfile(UUID.randomUUID()))
+                .isInstanceOf(UserNotFoundException.class)
+                .hasMessage("유저를 찾을 수 없습니다.");
+    }
+
+    @DisplayName("유저 정보 조회시 해당 유저가 이미 차단된 유저라면 예외를 반환한다.")
+    @Test
+    void shouldThrowException_whenBlockedUserTriesToGetProfile() {
+        //given
+        User user = User.builder()
+                .id(UUID.randomUUID())
+                .userId("userId")
+                .password("passwordd")
+                .nickname("nickname")
+                .status(UserStatus.BLOCKED)
+                .build();
+        userRepository.save(user);
+
         //when, then
         assertThatThrownBy(()->userService.getProfile(UUID.randomUUID()))
                 .isInstanceOf(UserNotFoundException.class)
@@ -132,7 +208,7 @@ class UserServiceTest {
         assertThat(afterUser.get().getStatus()).isEqualTo(UserStatus.WITHDRAWN);
     }
 
-    @DisplayName("유저 탈퇴시 해당 유저가 존재하지 않으면 에외를 반환한다.")
+    @DisplayName("유저 탈퇴시 해당 유저가 존재하지 않으면 예외를 반환한다.")
     @Test
     void shouldThrowException_whenWithdrawingNonExistentUser() {
         //when, then

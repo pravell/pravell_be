@@ -9,9 +9,12 @@ import com.pravell.user.application.dto.request.SignUpApplicationRequest;
 import com.pravell.user.application.dto.response.TokenResponse;
 import com.pravell.user.domain.exception.UserNotFoundException;
 import com.pravell.user.domain.model.User;
+import com.pravell.user.domain.model.UserStatus;
 import com.pravell.user.domain.repository.RefreshTokenRepository;
 import com.pravell.user.domain.repository.UserRepository;
 import java.util.Optional;
+import java.util.UUID;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +39,11 @@ class AuthFacadeSignInTest {
 
     @Autowired
     private RefreshTokenRepository refreshTokenRepository;
+
+    @AfterEach
+    void tearDown() {
+        userRepository.deleteAllInBatch();
+    }
 
     @DisplayName("로그인에 성공한다.")
     @Test
@@ -108,6 +116,90 @@ class AuthFacadeSignInTest {
         String refreshToken = refreshTokenRepository.findByUserId(user.get().getId());
         assertThat(refreshToken).isEqualTo(signInTokenResponse.getRefreshToken());
         assertThat(refreshToken).isNotEqualTo(tokenResponse.getRefreshToken());
+    }
+
+    @DisplayName("로그인을 시도 한 유저가 이미 탈퇴한 유저라면 예외가 발생한다.")
+    @Test
+    void shouldThrowException_whenWithdrawnUserTriesToLogin() {
+        //given
+        User user = User.builder()
+                .id(UUID.randomUUID())
+                .userId("userId")
+                .password("passwordd")
+                .nickname("nickname")
+                .status(UserStatus.WITHDRAWN)
+                .build();
+        userRepository.save(user);
+
+        SignInApplicationRequest request = getSignInApplicationRequest();
+
+        //when, then
+        assertThatThrownBy(() -> authFacade.signIn(request))
+                .isInstanceOf(UserNotFoundException.class)
+                .hasMessage("유저를 찾을 수 없습니다.");
+    }
+
+    @DisplayName("로그인을 시도 한 유저가 이미 삭제된 유저라면 예외가 발생한다.")
+    @Test
+    void shouldThrowException_whenDeletedUserTriesToLogin() {
+        //given
+        User user = User.builder()
+                .id(UUID.randomUUID())
+                .userId("userId")
+                .password("passwordd")
+                .nickname("nickname")
+                .status(UserStatus.DELETED)
+                .build();
+        userRepository.save(user);
+
+        SignInApplicationRequest request = getSignInApplicationRequest();
+
+        //when, then
+        assertThatThrownBy(() -> authFacade.signIn(request))
+                .isInstanceOf(UserNotFoundException.class)
+                .hasMessage("유저를 찾을 수 없습니다.");
+    }
+
+    @DisplayName("로그인을 시도 한 유저가 이미 정지된 유저라면 예외가 발생한다.")
+    @Test
+    void shouldThrowException_whenSuspendedUserTriesToLogin() {
+        //given
+        User user = User.builder()
+                .id(UUID.randomUUID())
+                .userId("userId")
+                .password("passwordd")
+                .nickname("nickname")
+                .status(UserStatus.SUSPENDED)
+                .build();
+        userRepository.save(user);
+
+        SignInApplicationRequest request = getSignInApplicationRequest();
+
+        //when, then
+        assertThatThrownBy(() -> authFacade.signIn(request))
+                .isInstanceOf(UserNotFoundException.class)
+                .hasMessage("유저를 찾을 수 없습니다.");
+    }
+
+    @DisplayName("로그인을 시도 한 유저가 이미 차단된 유저라면 예외가 발생한다.")
+    @Test
+    void shouldThrowException_whenBlockedUserTriesToLogin() {
+        //given
+        User user = User.builder()
+                .id(UUID.randomUUID())
+                .userId("userId")
+                .password("passwordd")
+                .nickname("nickname")
+                .status(UserStatus.BLOCKED)
+                .build();
+        userRepository.save(user);
+
+        SignInApplicationRequest request = getSignInApplicationRequest();
+
+        //when, then
+        assertThatThrownBy(() -> authFacade.signIn(request))
+                .isInstanceOf(UserNotFoundException.class)
+                .hasMessage("유저를 찾을 수 없습니다.");
     }
 
     private SignInApplicationRequest getSignInApplicationRequest() {

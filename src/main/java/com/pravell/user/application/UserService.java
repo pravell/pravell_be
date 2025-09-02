@@ -6,6 +6,7 @@ import com.pravell.user.application.dto.response.UserProfileResponse;
 import com.pravell.user.domain.event.UserCreatedEvent;
 import com.pravell.user.domain.exception.UserNotFoundException;
 import com.pravell.user.domain.model.User;
+import com.pravell.user.domain.model.UserStatus;
 import com.pravell.user.domain.repository.UserRepository;
 import java.util.Optional;
 import java.util.UUID;
@@ -53,7 +54,7 @@ public class UserService {
     public User findUserByUserId(String id) {
         Optional<User> user = userRepository.findByUserId(id);
 
-        if (user.isEmpty()) {
+        if (user.isEmpty() || !user.get().getStatus().equals(UserStatus.ACTIVE)) {
             log.warn("유저를 찾을 수 없습니다. Id : {}", id);
             throw new UserNotFoundException("유저를 찾을 수 없습니다.");
         }
@@ -65,7 +66,7 @@ public class UserService {
     public User findUserById(UUID id) {
         Optional<User> user = userRepository.findById(id);
 
-        if (user.isEmpty()) {
+        if (user.isEmpty() || !user.get().getStatus().equals(UserStatus.ACTIVE)) {
             log.warn("유저를 찾을 수 없습니다. Id : {}", id);
             throw new UserNotFoundException("유저를 찾을 수 없습니다.");
         }

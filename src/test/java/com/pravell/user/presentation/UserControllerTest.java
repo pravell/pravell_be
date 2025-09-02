@@ -146,6 +146,118 @@ class UserControllerTest {
                 .andReturn();
     }
 
+    @DisplayName("이미 탈퇴한 유저는 프로필 정보 조회에 실패하고, 404를 반환한다.")
+    @Test
+    void shouldReturnNotFound_whenUserHasWithdrawn() throws Exception {
+        //given
+        User user = User.builder()
+                .id(UUID.randomUUID())
+                .userId("userId")
+                .password("passwordd")
+                .nickname("nickname")
+                .status(UserStatus.WITHDRAWN)
+                .build();
+        userRepository.save(user);
+
+        String token = buildToken(user.getId(), "access", issuer, Instant.now().plusSeconds(100000));
+
+        //when, then
+        mockMvc.perform(
+                        get("/api/v1/users/me")
+                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("Not Found"))
+                .andExpect(jsonPath("$.message").value("유저를 찾을 수 없습니다."))
+                .andReturn();
+    }
+
+    @DisplayName("이미 삭제된 유저는 프로필 정보 조회에 실패하고, 404를 반환한다.")
+    @Test
+    void shouldReturnNotFound_whenUserHasDeleted() throws Exception {
+        //given
+        User user = User.builder()
+                .id(UUID.randomUUID())
+                .userId("userId")
+                .password("passwordd")
+                .nickname("nickname")
+                .status(UserStatus.DELETED)
+                .build();
+        userRepository.save(user);
+
+        String token = buildToken(user.getId(), "access", issuer, Instant.now().plusSeconds(100000));
+
+        //when, then
+        mockMvc.perform(
+                        get("/api/v1/users/me")
+                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("Not Found"))
+                .andExpect(jsonPath("$.message").value("유저를 찾을 수 없습니다."))
+                .andReturn();
+    }
+
+    @DisplayName("이미 정지된 유저는 프로필 정보 조회에 실패하고, 404를 반환한다.")
+    @Test
+    void shouldReturnNotFound_whenUserHasSuspended() throws Exception {
+        //given
+        User user = User.builder()
+                .id(UUID.randomUUID())
+                .userId("userId")
+                .password("passwordd")
+                .nickname("nickname")
+                .status(UserStatus.SUSPENDED)
+                .build();
+        userRepository.save(user);
+
+        String token = buildToken(user.getId(), "access", issuer, Instant.now().plusSeconds(100000));
+
+        //when, then
+        mockMvc.perform(
+                        get("/api/v1/users/me")
+                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("Not Found"))
+                .andExpect(jsonPath("$.message").value("유저를 찾을 수 없습니다."))
+                .andReturn();
+    }
+
+    @DisplayName("이미 차단된 유저는 프로필 정보 조회에 실패하고, 404를 반환한다.")
+    @Test
+    void shouldReturnNotFound_whenUserHasBlocked() throws Exception {
+        //given
+        User user = User.builder()
+                .id(UUID.randomUUID())
+                .userId("userId")
+                .password("passwordd")
+                .nickname("nickname")
+                .status(UserStatus.BLOCKED)
+                .build();
+        userRepository.save(user);
+
+        String token = buildToken(user.getId(), "access", issuer, Instant.now().plusSeconds(100000));
+
+        //when, then
+        mockMvc.perform(
+                        get("/api/v1/users/me")
+                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("Not Found"))
+                .andExpect(jsonPath("$.message").value("유저를 찾을 수 없습니다."))
+                .andReturn();
+    }
+
     @DisplayName("유저 탈퇴에 성공한다.")
     @Test
     void shouldWithdrawUserSuccessfully() throws Exception {
@@ -172,7 +284,7 @@ class UserControllerTest {
         assertThat(afterUser.get().getStatus()).isEqualTo(UserStatus.WITHDRAWN);
     }
 
-    @DisplayName("토큰에 해당하는 유저가 존재하지 않을 경우 404를 반환한다.")
+    @DisplayName("탈퇴시 토큰에 해당하는 유저가 존재하지 않을 경우 404를 반환한다.")
     @Test
     void shouldReturn404_whenUserDoesNotExistForGivenToken() throws Exception {
         //given
@@ -232,6 +344,114 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.code").value("Unauthorized"))
                 .andExpect(jsonPath("$.message").value("토큰이 올바르지 않습니다."))
                 .andReturn();
+    }
+
+    @DisplayName("이미 탈퇴된 유저는 탈퇴에 실패하고, 404를 반환한다.")
+    @Test
+    void shouldReturn404_whenWithdrawnUserTriesToWithdrawAgain() throws Exception {
+        //given
+        User user = User.builder()
+                .id(UUID.randomUUID())
+                .userId("userId")
+                .password("passwordd")
+                .nickname("nickname")
+                .status(UserStatus.WITHDRAWN)
+                .build();
+        userRepository.save(user);
+
+        String token = buildToken(user.getId(), "access", issuer, Instant.now().plusSeconds(1000));
+
+        //when, then
+        mockMvc.perform(
+                        delete("/api/v1/users/me")
+                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("Not Found"))
+                .andExpect(jsonPath("$.message").value("유저를 찾을 수 없습니다."));
+    }
+
+    @DisplayName("이미 삭제된 유저는 탈퇴에 실패하고, 404를 반환한다.")
+    @Test
+    void shouldReturn404_whenDeletedUserTriesToWithdrawAgain() throws Exception {
+        //given
+        User user = User.builder()
+                .id(UUID.randomUUID())
+                .userId("userId")
+                .password("passwordd")
+                .nickname("nickname")
+                .status(UserStatus.DELETED)
+                .build();
+        userRepository.save(user);
+
+        String token = buildToken(user.getId(), "access", issuer, Instant.now().plusSeconds(1000));
+
+        //when, then
+        mockMvc.perform(
+                        delete("/api/v1/users/me")
+                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("Not Found"))
+                .andExpect(jsonPath("$.message").value("유저를 찾을 수 없습니다."));
+    }
+
+    @DisplayName("이미 정지된 유저는 탈퇴에 실패하고, 404를 반환한다.")
+    @Test
+    void shouldReturn404_whenSuspendedUserTriesToWithdrawAgain() throws Exception {
+        //given
+        User user = User.builder()
+                .id(UUID.randomUUID())
+                .userId("userId")
+                .password("passwordd")
+                .nickname("nickname")
+                .status(UserStatus.SUSPENDED)
+                .build();
+        userRepository.save(user);
+
+        String token = buildToken(user.getId(), "access", issuer, Instant.now().plusSeconds(1000));
+
+        //when, then
+        mockMvc.perform(
+                        delete("/api/v1/users/me")
+                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("Not Found"))
+                .andExpect(jsonPath("$.message").value("유저를 찾을 수 없습니다."));
+    }
+
+    @DisplayName("이미 차단된 유저는 탈퇴에 실패하고, 404를 반환한다.")
+    @Test
+    void shouldReturn404_whenBlockedUserTriesToWithdrawAgain() throws Exception {
+        //given
+        User user = User.builder()
+                .id(UUID.randomUUID())
+                .userId("userId")
+                .password("passwordd")
+                .nickname("nickname")
+                .status(UserStatus.BLOCKED)
+                .build();
+        userRepository.save(user);
+
+        String token = buildToken(user.getId(), "access", issuer, Instant.now().plusSeconds(1000));
+
+        //when, then
+        mockMvc.perform(
+                        delete("/api/v1/users/me")
+                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("Not Found"))
+                .andExpect(jsonPath("$.message").value("유저를 찾을 수 없습니다."));
     }
 
     private String buildToken(UUID userId, String typ, String iss, Instant exp) {

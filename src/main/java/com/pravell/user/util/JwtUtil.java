@@ -40,6 +40,7 @@ public class JwtUtil {
                 .subject(user.getId().toString())
                 .issuer(issuer)
                 .issuedAt(new Date(now))
+                .id(UUID.randomUUID().toString())
                 .expiration(new Date(now + accessTtl.toMillis()))
                 .claim("id", user.getId().toString())
                 .claim("typ", "access")

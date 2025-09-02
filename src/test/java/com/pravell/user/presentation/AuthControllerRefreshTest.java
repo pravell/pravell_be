@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pravell.user.application.dto.response.TokenResponse;
 import com.pravell.user.domain.model.User;
+import com.pravell.user.domain.model.UserStatus;
 import com.pravell.user.domain.repository.RefreshTokenRepository;
 import com.pravell.user.domain.repository.UserRepository;
 import com.pravell.user.util.JwtUtil;
@@ -92,6 +93,7 @@ class AuthControllerRefreshTest {
                 .userId(userId)
                 .password(encodePassword)
                 .nickname("테스트유저")
+                .status(UserStatus.ACTIVE)
                 .build();
 
         refreshToken = jwtUtil.createRefreshToken(user);

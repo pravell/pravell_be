@@ -10,10 +10,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pravell.user.application.dto.response.TokenResponse;
 import com.pravell.user.domain.model.User;
+import com.pravell.user.domain.model.UserStatus;
 import com.pravell.user.domain.repository.RefreshTokenRepository;
 import com.pravell.user.domain.repository.UserRepository;
 import com.pravell.user.presentation.request.SignInRequest;
 import java.util.Optional;
+import java.util.UUID;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -223,6 +225,122 @@ class AuthControllerSignInTest {
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value("Unauthorized"))
                 .andExpect(jsonPath("$.message").value("비밀번호가 일치하지 않습니다."));
+    }
+
+    @DisplayName("해당 유저가 이미 탈퇴한 유저라면 404를 반환한다.")
+    @Test
+    void shouldReturn404_whenUserIsWithdrawn() throws Exception {
+        //given
+        SignInRequest request = SignInRequest.builder()
+                .id("testId")
+                .password("password")
+                .build();
+
+        userRepository.save(User.builder()
+                .id(UUID.randomUUID())
+                .userId(request.getId())
+                .password(request.getPassword())
+                .nickname("nickname")
+                .status(UserStatus.WITHDRAWN)
+                .build());
+
+        //when, then
+        mockMvc.perform(
+                        post("/api/v1/auth/sign-in")
+                                .content(objectMapper.writeValueAsString(request))
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("Not Found"))
+                .andExpect(jsonPath("$.message").value("유저를 찾을 수 없습니다."));
+    }
+
+    @DisplayName("해당 유저가 이미 삭제된 유저라면 404를 반환한다.")
+    @Test
+    void shouldReturn404_whenUserIsDeleted() throws Exception {
+        //given
+        SignInRequest request = SignInRequest.builder()
+                .id("testId")
+                .password("password")
+                .build();
+
+        userRepository.save(User.builder()
+                .id(UUID.randomUUID())
+                .userId(request.getId())
+                .password(request.getPassword())
+                .nickname("nickname")
+                .status(UserStatus.DELETED)
+                .build());
+
+        //when, then
+        mockMvc.perform(
+                        post("/api/v1/auth/sign-in")
+                                .content(objectMapper.writeValueAsString(request))
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("Not Found"))
+                .andExpect(jsonPath("$.message").value("유저를 찾을 수 없습니다."));
+    }
+
+    @DisplayName("해당 유저가 이미 정지된 유저라면 404를 반환한다.")
+    @Test
+    void shouldReturn404_whenUserIsSuspended() throws Exception {
+        //given
+        SignInRequest request = SignInRequest.builder()
+                .id("testId")
+                .password("password")
+                .build();
+
+        userRepository.save(User.builder()
+                .id(UUID.randomUUID())
+                .userId(request.getId())
+                .password(request.getPassword())
+                .nickname("nickname")
+                .status(UserStatus.SUSPENDED)
+                .build());
+
+        //when, then
+        mockMvc.perform(
+                        post("/api/v1/auth/sign-in")
+                                .content(objectMapper.writeValueAsString(request))
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("Not Found"))
+                .andExpect(jsonPath("$.message").value("유저를 찾을 수 없습니다."));
+    }
+
+    @DisplayName("해당 유저가 이미 차단된 유저라면 404를 반환한다.")
+    @Test
+    void shouldReturn404_whenUserIsBlocked() throws Exception {
+        //given
+        SignInRequest request = SignInRequest.builder()
+                .id("testId")
+                .password("password")
+                .build();
+
+        userRepository.save(User.builder()
+                .id(UUID.randomUUID())
+                .userId(request.getId())
+                .password(request.getPassword())
+                .nickname("nickname")
+                .status(UserStatus.BLOCKED)
+                .build());
+
+        //when, then
+        mockMvc.perform(
+                        post("/api/v1/auth/sign-in")
+                                .content(objectMapper.writeValueAsString(request))
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("Not Found"))
+                .andExpect(jsonPath("$.message").value("유저를 찾을 수 없습니다."));
     }
 
 }
