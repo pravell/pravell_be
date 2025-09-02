@@ -6,11 +6,14 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.pravell.common.exception.InvalidCredentialsException;
 import com.pravell.user.application.dto.request.SignUpApplicationRequest;
+import com.pravell.user.application.dto.response.UserProfileResponse;
 import com.pravell.user.domain.event.UserCreatedEvent;
+import com.pravell.user.domain.exception.UserNotFoundException;
 import com.pravell.user.domain.model.User;
 import com.pravell.user.domain.model.UserStatus;
 import com.pravell.user.domain.repository.UserRepository;
 import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,9 +77,34 @@ class UserServiceTest {
         String encodePassword = passwordEncoder.encode("passwordddd");
 
         //when, then
-        assertThatThrownBy(()->userService.verifyPassword(password, encodePassword))
+        assertThatThrownBy(() -> userService.verifyPassword(password, encodePassword))
                 .isInstanceOf(InvalidCredentialsException.class)
                 .hasMessage("비밀번호가 일치하지 않습니다.");
+    }
+
+    @DisplayName("유저의 프로필 정보를 조회한다.")
+    @Test
+    void shouldReturnUserProfile_whenAccessTokenIsValid() {
+        //given
+        User user = User.createUser("userId", "passwordTest", "nickname").getUser();
+        userRepository.save(user);
+
+        //when
+        UserProfileResponse profile = userService.getProfile(user.getId());
+
+        //then
+        assertThat(profile.getUserId()).isEqualTo(user.getUserId());
+        assertThat(profile.getNickname()).isEqualTo(user.getNickname());
+        assertThat(profile.getStatus()).isEqualTo(UserStatus.ACTIVE);
+    }
+
+    @DisplayName("유저 정보 조회시 해당 유저가 존재하지 않으면 에외를 반환한다.")
+    @Test
+    void shouldThrowException_whenUserNotFound() {
+        //when, then
+        assertThatThrownBy(()->userService.getProfile(UUID.randomUUID()))
+                .isInstanceOf(UserNotFoundException.class)
+                .hasMessage("유저를 찾을 수 없습니다.");
     }
 
 }

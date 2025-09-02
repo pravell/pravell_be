@@ -2,6 +2,7 @@ package com.pravell.user.application;
 
 import com.pravell.common.exception.InvalidCredentialsException;
 import com.pravell.user.application.dto.request.SignUpApplicationRequest;
+import com.pravell.user.application.dto.response.UserProfileResponse;
 import com.pravell.user.domain.event.UserCreatedEvent;
 import com.pravell.user.domain.exception.UserNotFoundException;
 import com.pravell.user.domain.model.User;
@@ -76,6 +77,17 @@ public class UserService {
         if (!passwordEncoder.matches(rawPassword, encodedPassword)) {
             throw new InvalidCredentialsException("비밀번호가 일치하지 않습니다.");
         }
+    }
+
+    @Transactional(readOnly = true)
+    public UserProfileResponse getProfile(UUID id) {
+        User user = findUserById(id);
+
+        return UserProfileResponse.builder()
+                .userId(user.getUserId())
+                .nickname(user.getNickname())
+                .status(user.getStatus())
+                .build();
     }
 
 }

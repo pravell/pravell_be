@@ -52,13 +52,13 @@ public class CommonJwtUtil {
 
     public UUID getUserIdFromToken(String authorizationHeader) {
         if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")){
-            throw new InvalidCredentialsException("Authorization 헤더가 유효하지 않습니다.");
+            throw new InvalidCredentialsException("토큰이 올바르지 않습니다.");
         }
 
         String accessToken = authorizationHeader.replace("Bearer ", "").trim();
 
         if (!isValidAccessToken(accessToken)) {
-            throw new InvalidCredentialsException("AccessToken 검증에 실패했습니다.");
+            throw new InvalidCredentialsException("토큰이 올바르지 않습니다.");
         }
 
         Claims claims = getClaims(accessToken);
