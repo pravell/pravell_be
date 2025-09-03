@@ -8,6 +8,14 @@ spring:
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
 
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
   data:
     redis:
       host: ${REDIS_HOST}
@@ -20,3 +28,8 @@ jwt:
   refresh-token-expiration: ${JWT_REFRESH_TOKEN_EXPIRATION}
   secret-key: ${JWT_SECRET}
   issuer: ${JWT_ISSUER}
+
+invite-code:
+  characters: ${INVITE_CODE_CHARACTERS}
+  length: ${INVITE_CODE_LENGTH}
+  expires: ${INVITE_CODE_EXPIRES}

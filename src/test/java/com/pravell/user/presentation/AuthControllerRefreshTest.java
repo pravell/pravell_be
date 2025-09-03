@@ -7,7 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.pravell.ControllerTestSupport;
 import com.pravell.user.application.dto.response.TokenResponse;
 import com.pravell.user.domain.model.User;
 import com.pravell.user.domain.model.UserStatus;
@@ -30,26 +30,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-@ActiveProfiles("test")
-@SpringBootTest
-@AutoConfigureMockMvc
 @DisplayName("AuthController 리프레시 토큰 통합 테스트")
-class AuthControllerRefreshTest {
-
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
+class AuthControllerRefreshTest extends ControllerTestSupport {
 
     @Autowired
     private UserRepository userRepository;
@@ -62,12 +49,6 @@ class AuthControllerRefreshTest {
 
     @Autowired
     private JwtUtil jwtUtil;
-
-    @Value("${jwt.issuer}")
-    private String issuer;
-
-    @Value("${jwt.secret-key}")
-    private String secretKey;
 
     @Value("${jwt.refresh-token-expiration}")
     private Duration refreshTokenTtl;

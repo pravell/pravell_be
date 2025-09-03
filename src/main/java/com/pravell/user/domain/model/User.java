@@ -8,7 +8,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -52,7 +52,7 @@ public class User extends AggregateRoot {
                 .status(UserStatus.ACTIVE)
                 .build();
 
-        return new UserCreatedEvent(user, ZonedDateTime.now());
+        return new UserCreatedEvent(user, LocalDateTime.now());
     }
 
     public void updateNickname(String nickname) {
