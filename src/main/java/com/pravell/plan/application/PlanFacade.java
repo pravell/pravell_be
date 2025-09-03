@@ -27,6 +27,7 @@ public class PlanFacade {
     private final FindPlanService findPlanService;
     private final PlanService planService;
     private final DeletePlanService deletePlanService;
+    private final UpdatePlanService updatePlanService;
 
     public CreatePlanResponse createPlan(CreatePlanApplicationRequest request, UUID id) {
         userService.findUserById(id);
@@ -111,6 +112,23 @@ public class PlanFacade {
         List<PlanUsers> planUsers = planService.findPlanUsers(planId);
 
         deletePlanService.deletePlan(plan, userId, planUsers);
+    }
+
+    public CreatePlanResponse updatePlan(UUID planId, UUID userId, CreatePlanApplicationRequest applicationRequest) {
+        userService.findUserById(userId);
+
+        Plan plan = planService.findPlan(planId);
+        List<PlanUsers> planUsers = planService.findPlanUsers(planId);
+
+        updatePlanService.update(plan, userId, planUsers, applicationRequest);
+
+        Plan afterPlan = planService.findPlan(planId);
+        return CreatePlanResponse.builder()
+                .planId(afterPlan.getId())
+                .name(afterPlan.getName())
+                .isPublic(afterPlan.getIsPublic())
+                .createdAt(afterPlan.getCreatedAt())
+                .build();
     }
 
 }

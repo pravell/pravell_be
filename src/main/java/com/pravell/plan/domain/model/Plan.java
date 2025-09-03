@@ -46,4 +46,21 @@ public class Plan extends AggregateRoot {
         isDeleted = true;
     }
 
+    @Override
+    public String toString() {
+        return "Plan{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", isPublic=" + isPublic +
+                ", isDeleted=" + isDeleted +
+                '}';
+    }
+
+    public void updatePublic(Boolean isPublic) {
+        this.isPublic = isPublic;
+    }
+
+    public void updateName(String name) {
+        this.name = name;
+    }
 }
