@@ -1,10 +1,13 @@
 package com.pravell.plan.application;
 
+import com.pravell.common.exception.AccessDeniedException;
+import com.pravell.plan.application.dto.request.KickUsersFromPlanApplicationRequest;
 import com.pravell.plan.application.dto.request.WithdrawFromPlansApplicationRequest;
 import com.pravell.plan.application.dto.response.InviteCodeResponse;
 import com.pravell.plan.application.dto.response.PlanJoinUserResponse;
 import com.pravell.plan.domain.model.Plan;
 import com.pravell.plan.domain.model.PlanInviteCode;
+import com.pravell.plan.domain.model.PlanUserStatus;
 import com.pravell.plan.domain.model.PlanUsers;
 import com.pravell.user.application.UserService;
 import java.util.List;
@@ -21,6 +24,7 @@ public class PlanMemberFacade {
     private final CreateInviteCodeService createInviteCodeService;
     private final JoinPlanService joinPlanService;
     private final WithdrawPlanService withdrawPlanService;
+    private final KickUserService kickUserService;
 
     public InviteCodeResponse createInviteCode(UUID planId, UUID userId) {
         userService.findUserById(userId);
@@ -47,4 +51,21 @@ public class PlanMemberFacade {
 
         withdrawPlanService.withdrawFromPlans(id, applicationRequest);
     }
+
+    public void kickUsers(UUID id, UUID planId, KickUsersFromPlanApplicationRequest request) {
+        userService.findUserById(id);
+
+        planService.findPlan(planId);
+        List<PlanUsers> planUsers = planService.findPlanUsers(planId);
+
+        boolean isOwner = planUsers.stream()
+                .anyMatch(pu -> pu.getUserId().equals(id) && pu.getPlanUserStatus().equals(PlanUserStatus.OWNER));
+
+        if (!isOwner) {
+            throw new AccessDeniedException("해당 리소스에 접근 할 권한이 없습니다.");
+        }
+
+        kickUserService.kickUsers(id, planUsers, request);
+    }
+
 }

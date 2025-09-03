@@ -69,4 +69,13 @@ public class PlanUsers extends BaseEntity {
         }
         this.planUserStatus = PlanUserStatus.WITHDRAWN;
     }
+
+
+    public void updateToKicked() {
+        if (!this.planUserStatus.equals(PlanUserStatus.MEMBER)){
+            log.info("해당 유저는 KICKED로 변경이 불가능합니다. User Id : {}", this.userId);
+            throw new AccessDeniedException("해당 유저는 KICKED로 변경이 불가능합니다.");
+        }
+        this.planUserStatus = PlanUserStatus.KICKED;
+    }
 }

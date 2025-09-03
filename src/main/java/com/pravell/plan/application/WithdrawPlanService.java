@@ -34,7 +34,10 @@ public class WithdrawPlanService {
                 .orElseThrow(() -> new PlanNotFoundException("해당 플랜에 유저가 존재하지 않습니다."));
 
         switch (planUsers.getPlanUserStatus()) {
-            case MEMBER -> planUsers.updateToWithdrawn();
+            case MEMBER -> {
+                log.info("{} 유저가 {} 플랜을 탈퇴했습니다.", userId, planId);
+                planUsers.updateToWithdrawn();
+            }
             case OWNER -> throw new IllegalArgumentException("플랜을 소유한 유저는 탈퇴할 수 없습니다.");
             default -> throw new PlanNotFoundException("해당 플랜에 유저가 존재하지 않습니다.");
         }
