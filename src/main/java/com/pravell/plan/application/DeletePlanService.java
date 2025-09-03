@@ -18,6 +18,7 @@ public class DeletePlanService {
 
     @Transactional
     public void deletePlan(Plan plan, UUID userId, List<PlanUsers> planUsers) {
+        log.info("{} 유저가 {} 플랜 삭제.", userId, plan.getId());
         validateOwnerPermission(userId, planUsers);
         plan.delete();
     }
