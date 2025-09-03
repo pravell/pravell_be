@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.pravell.common.exception.AccessDeniedException;
-import com.pravell.plan.application.dto.request.CreatePlanApplicationRequest;
+import com.pravell.plan.application.dto.request.UpdatePlanApplicationRequest;
 import com.pravell.plan.domain.model.Plan;
 import com.pravell.plan.domain.model.PlanUserStatus;
 import com.pravell.plan.domain.model.PlanUsers;
@@ -44,7 +44,7 @@ class UpdatePlanServiceTest {
                         .build()
         );
 
-        CreatePlanApplicationRequest request = CreatePlanApplicationRequest.builder()
+        UpdatePlanApplicationRequest request = UpdatePlanApplicationRequest.builder()
                 .name("새로운 이름")
                 .isPublic(true)
                 .build();
@@ -68,7 +68,7 @@ class UpdatePlanServiceTest {
                         .build()
         );
 
-        CreatePlanApplicationRequest request = CreatePlanApplicationRequest.builder()
+        UpdatePlanApplicationRequest request = UpdatePlanApplicationRequest.builder()
                 .name("수정할이름")
                 .isPublic(true)
                 .build();
@@ -90,7 +90,7 @@ class UpdatePlanServiceTest {
                         .build()
         );
 
-        CreatePlanApplicationRequest request = CreatePlanApplicationRequest.builder()
+        UpdatePlanApplicationRequest request = UpdatePlanApplicationRequest.builder()
                 .name("이름만 변경")
                 .build();
 
@@ -113,7 +113,7 @@ class UpdatePlanServiceTest {
                         .build()
         );
 
-        CreatePlanApplicationRequest request = CreatePlanApplicationRequest.builder()
+        UpdatePlanApplicationRequest request = UpdatePlanApplicationRequest.builder()
                 .isPublic(true)
                 .build();
 

@@ -11,7 +11,7 @@ import com.pravell.plan.domain.model.PlanUserStatus;
 import com.pravell.plan.domain.model.PlanUsers;
 import com.pravell.plan.domain.repository.PlanRepository;
 import com.pravell.plan.domain.repository.PlanUsersRepository;
-import com.pravell.plan.presentation.request.CreatePlanRequest;
+import com.pravell.plan.presentation.request.UpdatePlanRequest;
 import com.pravell.user.domain.model.User;
 import com.pravell.user.domain.model.UserStatus;
 import com.pravell.user.domain.repository.UserRepository;
@@ -125,7 +125,7 @@ class PlanControllerUpdateTest extends ControllerTestSupport {
     @Test
     void shouldUpdatePlanNameSuccessfully_whenUserIsOwner() throws Exception {
         //given
-        CreatePlanRequest request = CreatePlanRequest.builder()
+        UpdatePlanRequest request = UpdatePlanRequest.builder()
                 .name("변경 할 이름")
                 .build();
 
@@ -158,7 +158,7 @@ class PlanControllerUpdateTest extends ControllerTestSupport {
     @Test
     void shouldUpdatePlanVisibilitySuccessfully_whenUserIsOwner() throws Exception {
         //given
-        CreatePlanRequest request = CreatePlanRequest.builder()
+        UpdatePlanRequest request = UpdatePlanRequest.builder()
                 .isPublic(false)
                 .build();
 
@@ -191,7 +191,7 @@ class PlanControllerUpdateTest extends ControllerTestSupport {
     @Test
     void shouldUpdatePlanNameAndVisibilitySuccessfully_whenUserIsOwner() throws Exception {
         //given
-        CreatePlanRequest request = CreatePlanRequest.builder()
+        UpdatePlanRequest request = UpdatePlanRequest.builder()
                 .isPublic(false)
                 .name("업데이트할이름")
                 .build();
@@ -230,7 +230,7 @@ class PlanControllerUpdateTest extends ControllerTestSupport {
     @Test
     void shouldThrowAccessDenied_whenMemberTriesToUpdatePlanName() throws Exception {
         //given
-        CreatePlanRequest request = CreatePlanRequest.builder()
+        UpdatePlanRequest request = UpdatePlanRequest.builder()
                 .name("변경 할 이름")
                 .build();
 
@@ -261,7 +261,7 @@ class PlanControllerUpdateTest extends ControllerTestSupport {
     @Test
     void shouldThrowAccessDenied_whenMemberTriesToUpdatePlanVisibility() throws Exception {
         //given
-        CreatePlanRequest request = CreatePlanRequest.builder()
+        UpdatePlanRequest request = UpdatePlanRequest.builder()
                 .isPublic(false)
                 .build();
 
@@ -292,7 +292,7 @@ class PlanControllerUpdateTest extends ControllerTestSupport {
     @Test
     void shouldReturn403_whenMemberTriesToUpdatePlanNameAndVisibility() throws Exception {
         //given
-        CreatePlanRequest request = CreatePlanRequest.builder()
+        UpdatePlanRequest request = UpdatePlanRequest.builder()
                 .isPublic(false)
                 .name("업데이트할이름")
                 .build();
@@ -328,7 +328,7 @@ class PlanControllerUpdateTest extends ControllerTestSupport {
     @Test
     void shouldThrowAccessDenied_whenUnrelatedUserTriesToUpdatePlanName() throws Exception {
         //given
-        CreatePlanRequest request = CreatePlanRequest.builder()
+        UpdatePlanRequest request = UpdatePlanRequest.builder()
                 .name("변경 할 이름")
                 .build();
 
@@ -359,7 +359,7 @@ class PlanControllerUpdateTest extends ControllerTestSupport {
     @Test
     void shouldThrowAccessDenied_whenUnrelatedUserTriesToUpdatePlanVisibility() throws Exception {
         //given
-        CreatePlanRequest request = CreatePlanRequest.builder()
+        UpdatePlanRequest request = UpdatePlanRequest.builder()
                 .isPublic(false)
                 .build();
 
@@ -390,7 +390,7 @@ class PlanControllerUpdateTest extends ControllerTestSupport {
     @Test
     void shouldReturn403_whenUnrelatedUserTriesToUpdatePlanNameAndVisibility() throws Exception {
         //given
-        CreatePlanRequest request = CreatePlanRequest.builder()
+        UpdatePlanRequest request = UpdatePlanRequest.builder()
                 .isPublic(false)
                 .name("업데이트할이름")
                 .build();
@@ -426,7 +426,7 @@ class PlanControllerUpdateTest extends ControllerTestSupport {
     @Test
     void shouldReturn400_whenPlanNameIsTooShort() throws Exception {
         //given
-        CreatePlanRequest request = CreatePlanRequest.builder()
+        UpdatePlanRequest request = UpdatePlanRequest.builder()
                 .isPublic(false)
                 .name("경")
                 .build();
@@ -462,7 +462,7 @@ class PlanControllerUpdateTest extends ControllerTestSupport {
     @Test
     void shouldReturn400_whenPlanNameIsTooLong() throws Exception {
         //given
-        CreatePlanRequest request = CreatePlanRequest.builder()
+        UpdatePlanRequest request = UpdatePlanRequest.builder()
                 .isPublic(false)
                 .name("경".repeat(21))
                 .build();
@@ -498,7 +498,7 @@ class PlanControllerUpdateTest extends ControllerTestSupport {
     @Test
     void shouldReturn404_whenUserDoesNotExist() throws Exception {
         //given
-        CreatePlanRequest request = CreatePlanRequest.builder()
+        UpdatePlanRequest request = UpdatePlanRequest.builder()
                 .isPublic(false)
                 .name("업데이트할이름")
                 .build();
@@ -543,7 +543,7 @@ class PlanControllerUpdateTest extends ControllerTestSupport {
                 .build();
         userRepository.save(user);
 
-        CreatePlanRequest request = CreatePlanRequest.builder()
+        UpdatePlanRequest request = UpdatePlanRequest.builder()
                 .isPublic(false)
                 .name("업데이트할이름")
                 .build();
@@ -588,7 +588,7 @@ class PlanControllerUpdateTest extends ControllerTestSupport {
                 .build();
         userRepository.save(user);
 
-        CreatePlanRequest request = CreatePlanRequest.builder()
+        UpdatePlanRequest request = UpdatePlanRequest.builder()
                 .isPublic(false)
                 .name("업데이트할이름")
                 .build();
@@ -633,7 +633,7 @@ class PlanControllerUpdateTest extends ControllerTestSupport {
                 .build();
         userRepository.save(user);
 
-        CreatePlanRequest request = CreatePlanRequest.builder()
+        UpdatePlanRequest request = UpdatePlanRequest.builder()
                 .isPublic(false)
                 .name("업데이트할이름")
                 .build();
@@ -678,7 +678,7 @@ class PlanControllerUpdateTest extends ControllerTestSupport {
                 .build();
         userRepository.save(user);
 
-        CreatePlanRequest request = CreatePlanRequest.builder()
+        UpdatePlanRequest request = UpdatePlanRequest.builder()
                 .isPublic(false)
                 .name("업데이트할이름")
                 .build();

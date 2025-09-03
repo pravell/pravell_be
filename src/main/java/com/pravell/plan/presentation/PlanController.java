@@ -6,6 +6,7 @@ import com.pravell.plan.application.dto.response.CreatePlanResponse;
 import com.pravell.plan.application.dto.response.FindPlanResponse;
 import com.pravell.plan.application.dto.response.FindPlansResponse;
 import com.pravell.plan.presentation.request.CreatePlanRequest;
+import com.pravell.plan.presentation.request.UpdatePlanRequest;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
@@ -64,9 +65,9 @@ public class PlanController {
     @PatchMapping("/{planId}")
     public ResponseEntity<CreatePlanResponse> updatePlan(@RequestHeader("Authorization") String authorizationHeader,
                                                          @PathVariable UUID planId,
-                                                         @Valid @RequestBody CreatePlanRequest createPlanRequest) {
+                                                         @Valid @RequestBody UpdatePlanRequest updatePlanRequest) {
         UUID id = commonJwtUtil.getUserIdFromToken(authorizationHeader);
-        return ResponseEntity.ok(planFacade.updatePlan(planId, id, createPlanRequest.toApplicationRequest()));
+        return ResponseEntity.ok(planFacade.updatePlan(planId, id, updatePlanRequest.toApplicationRequest()));
     }
 
 }

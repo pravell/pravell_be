@@ -1,6 +1,7 @@
 package com.pravell.plan.application;
 
 import com.pravell.plan.application.dto.request.CreatePlanApplicationRequest;
+import com.pravell.plan.application.dto.request.UpdatePlanApplicationRequest;
 import com.pravell.plan.application.dto.response.CreatePlanResponse;
 import com.pravell.plan.application.dto.response.FindPlanResponse;
 import com.pravell.plan.application.dto.response.FindPlansResponse;
@@ -9,6 +10,7 @@ import com.pravell.plan.domain.model.Member;
 import com.pravell.plan.domain.model.Plan;
 import com.pravell.plan.domain.model.PlanUserStatus;
 import com.pravell.plan.domain.model.PlanUsers;
+import com.pravell.plan.presentation.request.UpdatePlanRequest;
 import com.pravell.user.application.UserService;
 import com.pravell.user.application.dto.UserMemberDTO;
 import java.util.ArrayList;
@@ -114,13 +116,13 @@ public class PlanFacade {
         deletePlanService.deletePlan(plan, userId, planUsers);
     }
 
-    public CreatePlanResponse updatePlan(UUID planId, UUID userId, CreatePlanApplicationRequest applicationRequest) {
+    public CreatePlanResponse updatePlan(UUID planId, UUID userId, UpdatePlanApplicationRequest request) {
         userService.findUserById(userId);
 
         Plan plan = planService.findPlan(planId);
         List<PlanUsers> planUsers = planService.findPlanUsers(planId);
 
-        updatePlanService.update(plan, userId, planUsers, applicationRequest);
+        updatePlanService.update(plan, userId, planUsers, request);
 
         Plan afterPlan = planService.findPlan(planId);
         return CreatePlanResponse.builder()

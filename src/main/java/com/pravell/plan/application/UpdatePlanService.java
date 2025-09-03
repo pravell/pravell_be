@@ -1,7 +1,7 @@
 package com.pravell.plan.application;
 
 import com.pravell.common.exception.AccessDeniedException;
-import com.pravell.plan.application.dto.request.CreatePlanApplicationRequest;
+import com.pravell.plan.application.dto.request.UpdatePlanApplicationRequest;
 import com.pravell.plan.domain.model.Plan;
 import com.pravell.plan.domain.model.PlanUserStatus;
 import com.pravell.plan.domain.model.PlanUsers;
@@ -19,17 +19,17 @@ public class UpdatePlanService {
 
     @Transactional
     public void update(Plan plan, UUID userId, List<PlanUsers> planUsers,
-                       CreatePlanApplicationRequest applicationRequest) {
+                       UpdatePlanApplicationRequest request) {
         log.info("{}유저가 {} plan 업데이트. before : {}, after : {}",
-                userId, plan.getId(), plan.toString(), applicationRequest.toString());
+                userId, plan.getId(), plan.toString(), request.toString());
 
         validateUpdatePermission(userId, planUsers);
 
-        if (applicationRequest.getIsPublic() != null) {
-            plan.updatePublic(applicationRequest.getIsPublic());
+        if (request.getIsPublic() != null) {
+            plan.updatePublic(request.getIsPublic());
         }
-        if (applicationRequest.getName() != null) {
-            plan.updateName(applicationRequest.getName());
+        if (request.getName() != null) {
+            plan.updateName(request.getName());
         }
     }
 
