@@ -62,4 +62,11 @@ public class PlanUsers extends BaseEntity {
         this.planUserStatus = PlanUserStatus.MEMBER;
     }
 
+    public void updateToWithdrawn() {
+        if (!this.planUserStatus.equals(PlanUserStatus.MEMBER)){
+            log.info("해당 유저는 WITHDRAWN으로 변경이 불가능합니다. User Id : {}", this.userId);
+            throw new AccessDeniedException("해당 유저는 WITHDRAWN로 변경이 불가능합니다.");
+        }
+        this.planUserStatus = PlanUserStatus.WITHDRAWN;
+    }
 }

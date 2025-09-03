@@ -1,5 +1,6 @@
 package com.pravell.plan.application;
 
+import com.pravell.plan.application.dto.request.WithdrawFromPlansApplicationRequest;
 import com.pravell.plan.application.dto.response.InviteCodeResponse;
 import com.pravell.plan.application.dto.response.PlanJoinUserResponse;
 import com.pravell.plan.domain.model.Plan;
@@ -19,6 +20,7 @@ public class PlanMemberFacade {
     private final PlanService planService;
     private final CreateInviteCodeService createInviteCodeService;
     private final JoinPlanService joinPlanService;
+    private final WithdrawPlanService withdrawPlanService;
 
     public InviteCodeResponse createInviteCode(UUID planId, UUID userId) {
         userService.findUserById(userId);
@@ -38,5 +40,11 @@ public class PlanMemberFacade {
         joinPlanService.join(userId, plan);
 
         return new PlanJoinUserResponse(plan.getId());
+    }
+
+    public void withdrawPlans(UUID id, WithdrawFromPlansApplicationRequest applicationRequest) {
+        userService.findUserById(id);
+
+        withdrawPlanService.withdrawFromPlans(id, applicationRequest);
     }
 }
