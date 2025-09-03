@@ -1,6 +1,6 @@
 package com.pravell.plan.application.dto.response;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,6 +12,6 @@ public class CreatePlanResponse {
     private UUID planId;
     private String name;
     private Boolean isPublic;
-    private ZonedDateTime createdAt;
+    private LocalDateTime createdAt;
 
 }

@@ -9,4 +9,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PlanUsersRepository extends JpaRepository<PlanUsers, Long> {
     List<PlanUsers> findAllByUserId(UUID userId);
+
+    List<PlanUsers> findAllByPlanId(UUID planId);
 }

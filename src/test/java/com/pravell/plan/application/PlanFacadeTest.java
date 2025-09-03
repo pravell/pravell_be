@@ -17,7 +17,7 @@ import com.pravell.plan.domain.model.PlanUsers;
 import com.pravell.user.application.UserService;
 import com.pravell.user.domain.exception.UserNotFoundException;
 import com.pravell.user.domain.model.User;
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -62,7 +62,7 @@ class PlanFacadeTest {
                 .planUserStatus(PlanUserStatus.OWNER)
                 .build();
 
-        PlanCreatedEvent planCreatedEvent = new PlanCreatedEvent(plan, planUsers, ZonedDateTime.now());
+        PlanCreatedEvent planCreatedEvent = new PlanCreatedEvent(plan, planUsers, LocalDateTime.now());
 
         given(userService.findUserById(userId)).willReturn(mock(User.class));
         given(createPlanService.create(request, userId)).willReturn(planCreatedEvent);

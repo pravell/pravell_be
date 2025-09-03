@@ -4,7 +4,7 @@ import com.pravell.plan.application.dto.request.CreatePlanApplicationRequest;
 import com.pravell.plan.domain.event.PlanCreatedEvent;
 import com.pravell.plan.domain.model.Plan;
 import com.pravell.plan.domain.model.PlanUsers;
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +15,7 @@ public class PlanCreateService {
         Plan plan = Plan.create(request.getName(), request.getIsPublic());
         PlanUsers planUsers = PlanUsers.createOwnerForPlan(id, plan.getId());
 
-        return new PlanCreatedEvent(plan, planUsers, ZonedDateTime.now());
+        return new PlanCreatedEvent(plan, planUsers, LocalDateTime.now());
     }
 
 }

@@ -1,6 +1,7 @@
 package com.pravell.user.application;
 
 import com.pravell.common.exception.InvalidCredentialsException;
+import com.pravell.user.application.dto.UserMemberDTO;
 import com.pravell.user.application.dto.request.SignUpApplicationRequest;
 import com.pravell.user.application.dto.request.UpdateUserApplicationRequest;
 import com.pravell.user.application.dto.response.UserProfileResponse;
@@ -9,6 +10,7 @@ import com.pravell.user.domain.exception.UserNotFoundException;
 import com.pravell.user.domain.model.User;
 import com.pravell.user.domain.model.UserStatus;
 import com.pravell.user.domain.repository.UserRepository;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -105,7 +107,7 @@ public class UserService {
         log.info("유저 업데이트. Id : {}, nicknameBefore : {}, nicknameAfter : {}",
                 id, user.getNickname(), updateUserApplicationRequest.getNickname());
 
-        if (userRepository.existsByNickname(updateUserApplicationRequest.getNickname())){
+        if (userRepository.existsByNickname(updateUserApplicationRequest.getNickname())) {
             throw new DuplicateKeyException("이미 존재하는 닉네임입니다.");
         }
 
@@ -119,6 +121,20 @@ public class UserService {
                 .nickname(user.getNickname())
                 .status(user.getStatus())
                 .build();
+    }
+
+    @Transactional(readOnly = true)
+    public List<UserMemberDTO> findMembers(List<UUID> memberId) {
+        List<User> users = userRepository.findAllById(memberId);
+
+        return users.stream()
+                .filter(u -> u.getStatus().equals(UserStatus.ACTIVE))
+                .map(user -> {
+                    return UserMemberDTO.builder()
+                            .memberId(user.getId())
+                            .nickname(user.getNickname())
+                            .build();
+                }).toList();
     }
 
 }

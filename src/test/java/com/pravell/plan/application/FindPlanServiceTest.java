@@ -1,8 +1,11 @@
 package com.pravell.plan.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
 import static org.assertj.core.groups.Tuple.tuple;
 
+import com.pravell.common.exception.AccessDeniedException;
 import com.pravell.plan.application.dto.response.FindPlansResponse;
 import com.pravell.plan.domain.model.Plan;
 import com.pravell.plan.domain.model.PlanUserStatus;
@@ -32,6 +35,9 @@ class FindPlanServiceTest {
 
     @Autowired
     private PlanUsersRepository planUsersRepository;
+
+    private final UUID userId = UUID.randomUUID();
+    private final UUID planId = UUID.randomUUID();
 
     @AfterEach
     void tearDown() {
@@ -78,6 +84,73 @@ class FindPlanServiceTest {
                 );
     }
 
+    @Test
+    @DisplayName("BLOCKED 멤버면 접근할 수 없다.")
+    void shouldThrowAccessDenied_whenUserIsBlocked() {
+        //given
+        Plan plan = getPlan(true);
+        List<PlanUsers> planUsers = List.of(getPlanUser(userId, PlanUserStatus.BLOCKED));
+
+        //when, then
+        assertThatThrownBy(() -> findPlanService.validateMemberOrOwner(plan, userId, planUsers))
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessage("해당 리소스에 접근 할 권한이 없습니다.");
+    }
+
+    @Test
+    @DisplayName("PRIVATE 플랜의 OWNER 또는 MEMBER가 아니면 접근할 수 없다.")
+    void shouldThrowAccessDenied_whenUserNotMemberOrOwnerInPrivatePlan() {
+        //given
+        Plan plan = getPlan(false);
+        UUID otherUserId = UUID.randomUUID();
+        List<PlanUsers> planUsers = List.of(
+                getPlanUser(otherUserId, PlanUserStatus.MEMBER)
+        );
+
+        //when, then
+        assertThatThrownBy(() -> findPlanService.validateMemberOrOwner(plan, userId, planUsers))
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessage("해당 리소스에 접근 할 권한이 없습니다.");
+    }
+
+    @Test
+    @DisplayName("PRIVATE 플랜의 MEMBER면 접근 가능하다.")
+    void shouldPass_whenUserIsMemberInPrivatePlan() {
+        //given
+        Plan plan = getPlan(false);
+        List<PlanUsers> planUsers = List.of(getPlanUser(userId, PlanUserStatus.MEMBER));
+
+        //when, then
+        assertThatCode(() -> findPlanService.validateMemberOrOwner(plan, userId, planUsers))
+                .doesNotThrowAnyException();
+    }
+
+    @Test
+    @DisplayName("PRIVATE 플랜의 OWNER면 접근 가능하다.")
+    void shouldPass_whenUserIsOwnerInPrivatePlan() {
+        //given
+        Plan plan = getPlan(false);
+        List<PlanUsers> planUsers = List.of(getPlanUser(userId, PlanUserStatus.OWNER));
+
+        //when, then
+        assertThatCode(() -> findPlanService.validateMemberOrOwner(plan, userId, planUsers))
+                .doesNotThrowAnyException();
+    }
+
+    @Test
+    @DisplayName("PUBLIC 플랜은 OWNER/MEMBER가 아니어도 BLOCKED가 아니면 접근 가능하다.")
+    void shouldPass_whenUserIsNotMemberButPlanIsPublic() {
+        //given
+        Plan plan = getPlan(true);
+        List<PlanUsers> planUsers = List.of(
+                getPlanUser(UUID.randomUUID(), PlanUserStatus.MEMBER)
+        );
+
+        //when, then
+        assertThatCode(() -> findPlanService.validateMemberOrOwner(plan, userId, planUsers))
+                .doesNotThrowAnyException();
+    }
+
     private Plan getPlan(String name, boolean isPublic, boolean isDeleted) {
         return Plan.builder()
                 .id(UUID.randomUUID())
@@ -88,6 +161,23 @@ class FindPlanServiceTest {
     }
 
     private PlanUsers getPlanUsers(PlanUserStatus status, UUID planId, UUID userId) {
+        return PlanUsers.builder()
+                .planId(planId)
+                .userId(userId)
+                .planUserStatus(status)
+                .build();
+    }
+
+    private Plan getPlan(boolean isPublic) {
+        return Plan.builder()
+                .id(planId)
+                .name("테스트 여행")
+                .isDeleted(false)
+                .isPublic(isPublic)
+                .build();
+    }
+
+    private PlanUsers getPlanUser(UUID userId, PlanUserStatus status) {
         return PlanUsers.builder()
                 .planId(planId)
                 .userId(userId)

@@ -1,5 +1,6 @@
 package com.pravell.plan.application;
 
+import com.pravell.common.exception.AccessDeniedException;
 import com.pravell.plan.application.dto.response.FindPlansResponse;
 import com.pravell.plan.domain.model.Plan;
 import com.pravell.plan.domain.model.PlanUserStatus;
@@ -52,6 +53,28 @@ public class FindPlanService {
                             .build();
                 }).filter(Objects::nonNull)
                 .toList();
+    }
+
+    public void validateMemberOrOwner(Plan plan, UUID userId, List<PlanUsers> planUsers) {
+        boolean isBlocked = planUsers.stream()
+                .anyMatch(p -> p.getUserId().equals(userId) && p.getPlanUserStatus().equals(PlanUserStatus.BLOCKED));
+
+        if (isBlocked) {
+            throw new AccessDeniedException("해당 리소스에 접근 할 권한이 없습니다.");
+        }
+
+        if (!plan.getIsPublic()) {
+            boolean isMemberOrOwner = planUsers.stream()
+                    .filter(p ->
+                            p.getPlanUserStatus().equals(PlanUserStatus.OWNER) ||
+                                    p.getPlanUserStatus().equals(PlanUserStatus.MEMBER))
+                    .map(PlanUsers::getUserId)
+                    .anyMatch(pu -> pu.equals(userId));
+
+            if (!isMemberOrOwner) {
+                throw new AccessDeniedException("해당 리소스에 접근 할 권한이 없습니다.");
+            }
+        }
     }
 
 }
