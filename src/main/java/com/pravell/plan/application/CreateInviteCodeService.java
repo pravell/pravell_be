@@ -39,7 +39,7 @@ public class CreateInviteCodeService {
         String code = generateCode();
 
         planInviteCodeRepository.save(PlanInviteCode.builder()
-                        .plan_id(plan.getId())
+                        .planId(plan.getId())
                         .code(code)
                         .createdBy(userId)
                         .expiresAt(LocalDateTime.now().plusDays(CODE_EXPIRES))

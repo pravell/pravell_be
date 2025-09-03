@@ -1,6 +1,7 @@
 package com.pravell.plan.domain.model;
 
 import com.pravell.common.domain.BaseEntity;
+import com.pravell.common.exception.AccessDeniedException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -16,6 +17,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Entity
 @Table(
@@ -28,6 +30,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Slf4j
 public class PlanUsers extends BaseEntity {
 
     @Id
@@ -50,4 +53,13 @@ public class PlanUsers extends BaseEntity {
                 .planUserStatus(PlanUserStatus.OWNER)
                 .build();
     }
+
+    public void updateToMember() {
+        if (this.planUserStatus.equals(PlanUserStatus.BLOCKED)) {
+            log.info("해당 유저는 MEMBER로 변경이 불가능합니다. User Id : {}", this.userId);
+            throw new AccessDeniedException("해당 유저는 MEMBER로 변경이 불가능합니다.");
+        }
+        this.planUserStatus = PlanUserStatus.MEMBER;
+    }
+
 }

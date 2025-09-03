@@ -1,7 +1,9 @@
 package com.pravell.plan.application;
 
 import com.pravell.plan.application.dto.response.InviteCodeResponse;
+import com.pravell.plan.application.dto.response.PlanJoinUserResponse;
 import com.pravell.plan.domain.model.Plan;
+import com.pravell.plan.domain.model.PlanInviteCode;
 import com.pravell.plan.domain.model.PlanUsers;
 import com.pravell.user.application.UserService;
 import java.util.List;
@@ -16,6 +18,7 @@ public class PlanMemberFacade {
     private final UserService userService;
     private final PlanService planService;
     private final CreateInviteCodeService createInviteCodeService;
+    private final JoinPlanService joinPlanService;
 
     public InviteCodeResponse createInviteCode(UUID planId, UUID userId) {
         userService.findUserById(userId);
@@ -25,5 +28,15 @@ public class PlanMemberFacade {
 
         String code = createInviteCodeService.create(plan, planUsers, userId);
         return new InviteCodeResponse(code);
+    }
+
+    public PlanJoinUserResponse join(UUID userId, String code) {
+        userService.findUserById(userId);
+        PlanInviteCode planInviteCode = joinPlanService.findPlanInviteCode(code);
+        Plan plan = planService.findPlan(planInviteCode.getPlanId());
+
+        joinPlanService.join(userId, plan);
+
+        return new PlanJoinUserResponse(plan.getId());
     }
 }

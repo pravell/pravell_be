@@ -12,11 +12,13 @@ import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "plan_invite_codes")
 @Builder
+@Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class PlanInviteCode extends BaseEntity {
@@ -26,7 +28,7 @@ public class PlanInviteCode extends BaseEntity {
     private Long id;
 
     @Column(columnDefinition = "BINARY(16)", nullable = false)
-    private UUID plan_id;
+    private UUID planId;
 
     @Column(unique = true, nullable = false)
     private String code;
