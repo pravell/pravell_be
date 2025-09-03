@@ -26,6 +26,7 @@ public class PlanFacade {
     private final CreatePlanService createPlanService;
     private final FindPlanService findPlanService;
     private final PlanService planService;
+    private final DeletePlanService deletePlanService;
 
     public CreatePlanResponse createPlan(CreatePlanApplicationRequest request, UUID id) {
         userService.findUserById(id);
@@ -101,6 +102,15 @@ public class PlanFacade {
         }
 
         return Pair.of(ownerNickname, members);
+    }
+
+    public void deletePlan(UUID planId, UUID userId) {
+        userService.findUserById(userId);
+
+        Plan plan = planService.findPlan(planId);
+        List<PlanUsers> planUsers = planService.findPlanUsers(planId);
+
+        deletePlanService.deletePlan(plan, userId, planUsers);
     }
 
 }

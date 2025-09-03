@@ -42,4 +42,8 @@ public class Plan extends AggregateRoot {
                 .build();
     }
 
+    public void delete() {
+        isDeleted = true;
+    }
+
 }

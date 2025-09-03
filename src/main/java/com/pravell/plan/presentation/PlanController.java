@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -38,16 +39,25 @@ public class PlanController {
     }
 
     @GetMapping
-    public ResponseEntity<List<FindPlansResponse>> findPlans(@RequestHeader("Authorization") String authorizationHeader) {
+    public ResponseEntity<List<FindPlansResponse>> findPlans(
+            @RequestHeader("Authorization") String authorizationHeader) {
         UUID id = commonJwtUtil.getUserIdFromToken(authorizationHeader);
         return ResponseEntity.ok(planFacade.findAllPlans(id));
     }
 
     @GetMapping("/{planId}")
     public ResponseEntity<FindPlanResponse> findPlan(@RequestHeader("Authorization") String authorizationHeader,
-                                                     @PathVariable UUID planId){
-        UUID id =commonJwtUtil.getUserIdFromToken(authorizationHeader);
+                                                     @PathVariable UUID planId) {
+        UUID id = commonJwtUtil.getUserIdFromToken(authorizationHeader);
         return ResponseEntity.ok(planFacade.findPlan(planId, id));
+    }
+
+    @DeleteMapping("/{planId}/permanent")
+    public ResponseEntity<Void> deletePlan(@RequestHeader("Authorization") String authorizationHeader,
+                                           @PathVariable UUID planId) {
+        UUID id = commonJwtUtil.getUserIdFromToken(authorizationHeader);
+        planFacade.deletePlan(planId, id);
+        return ResponseEntity.noContent().build();
     }
 
 }
