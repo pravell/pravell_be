@@ -60,7 +60,7 @@ class PlaceControllerFindAllTest extends PlaceControllerTestSupport {
 
         //when
         MvcResult mvcResult = mockMvc.perform(
-                        get("/api/v1/places/" + plan.getId())
+                        get("/api/v1/places/plan/" + plan.getId())
                                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -106,7 +106,7 @@ class PlaceControllerFindAllTest extends PlaceControllerTestSupport {
 
         //when
         MvcResult mvcResult = mockMvc.perform(
-                        get("/api/v1/places/" + plan.getId())
+                        get("/api/v1/places/plan/" + plan.getId())
                                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -149,7 +149,7 @@ class PlaceControllerFindAllTest extends PlaceControllerTestSupport {
 
         //when, then
         mockMvc.perform(
-                        get("/api/v1/places/" + plan.getId())
+                        get("/api/v1/places/plan/" + plan.getId())
                                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isForbidden())
@@ -184,7 +184,7 @@ class PlaceControllerFindAllTest extends PlaceControllerTestSupport {
 
         //when
         MvcResult mvcResult = mockMvc.perform(
-                        get("/api/v1/places/" + plan.getId())
+                        get("/api/v1/places/plan/" + plan.getId())
                                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -227,7 +227,7 @@ class PlaceControllerFindAllTest extends PlaceControllerTestSupport {
 
         //when
         MvcResult mvcResult = mockMvc.perform(
-                        get("/api/v1/places/" + plan.getId())
+                        get("/api/v1/places/plan/" + plan.getId())
                                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -273,7 +273,7 @@ class PlaceControllerFindAllTest extends PlaceControllerTestSupport {
 
         //when
         MvcResult mvcResult = mockMvc.perform(
-                        get("/api/v1/places/" + plan.getId())
+                        get("/api/v1/places/plan/" + plan.getId())
                                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -319,7 +319,7 @@ class PlaceControllerFindAllTest extends PlaceControllerTestSupport {
 
         //when
         MvcResult mvcResult = mockMvc.perform(
-                        get("/api/v1/places/" + plan.getId())
+                        get("/api/v1/places/plan/" + plan.getId())
                                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -365,7 +365,7 @@ class PlaceControllerFindAllTest extends PlaceControllerTestSupport {
 
         //when
         mockMvc.perform(
-                        get("/api/v1/places/" + plan.getId())
+                        get("/api/v1/places/plan/" + plan.getId())
                                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isForbidden())
@@ -399,7 +399,7 @@ class PlaceControllerFindAllTest extends PlaceControllerTestSupport {
 
         //when
         mockMvc.perform(
-                        get("/api/v1/places/" + plan.getId())
+                        get("/api/v1/places/plan/" + plan.getId())
                                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isForbidden())
@@ -433,7 +433,7 @@ class PlaceControllerFindAllTest extends PlaceControllerTestSupport {
 
         //when, then
         mockMvc.perform(
-                        get("/api/v1/places/" + plan.getId())
+                        get("/api/v1/places/plan/" + plan.getId())
                                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isForbidden())
@@ -467,7 +467,7 @@ class PlaceControllerFindAllTest extends PlaceControllerTestSupport {
 
         //when, then
         mockMvc.perform(
-                        get("/api/v1/places/" + plan.getId())
+                        get("/api/v1/places/plan/" + plan.getId())
                                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isForbidden())
@@ -520,7 +520,7 @@ class PlaceControllerFindAllTest extends PlaceControllerTestSupport {
 
         //when, then
         mockMvc.perform(
-                        get("/api/v1/places/" + plan.getId())
+                        get("/api/v1/places/plan/" + plan.getId())
                                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
@@ -548,7 +548,7 @@ class PlaceControllerFindAllTest extends PlaceControllerTestSupport {
 
         //when, then
         mockMvc.perform(
-                        get("/api/v1/places/" + plan.getId())
+                        get("/api/v1/places/plan/" + plan.getId())
                                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
@@ -582,7 +582,7 @@ class PlaceControllerFindAllTest extends PlaceControllerTestSupport {
 
         //when, then
         mockMvc.perform(
-                        get("/api/v1/places/" + plan.getId())
+                        get("/api/v1/places/plan/" + plan.getId())
                                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
@@ -616,7 +616,7 @@ class PlaceControllerFindAllTest extends PlaceControllerTestSupport {
 
         //when, then
         mockMvc.perform(
-                        get("/api/v1/places/" + plan.getId())
+                        get("/api/v1/places/plan/" + plan.getId())
                                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
@@ -650,7 +650,7 @@ class PlaceControllerFindAllTest extends PlaceControllerTestSupport {
 
         //when, then
         mockMvc.perform(
-                        get("/api/v1/places/" + plan.getId())
+                        get("/api/v1/places/plan/" + plan.getId())
                                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
@@ -684,7 +684,7 @@ class PlaceControllerFindAllTest extends PlaceControllerTestSupport {
 
         //when, then
         mockMvc.perform(
-                        get("/api/v1/places/" + plan.getId())
+                        get("/api/v1/places/plan/" + plan.getId())
                                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())

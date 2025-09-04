@@ -44,14 +44,14 @@ public class PlaceController {
 
     @PostMapping
     public ResponseEntity<SavePlaceResponse> savePlace(@RequestHeader("authorization") String authorizationHeader,
-                                                       @Valid @RequestBody SavePlaceRequest savePlaceRequest){
+                                                       @Valid @RequestBody SavePlaceRequest savePlaceRequest) {
         UUID id = commonJwtUtil.getUserIdFromToken(authorizationHeader);
         return ResponseEntity.ok(placeFacade.savePlace(id, savePlaceRequest.toApplicationRequest()));
     }
 
-    @GetMapping("/{planId}")
+    @GetMapping("/plan/{planId}")
     public ResponseEntity<List<FindPlanPlacesResponse>> findPlanPlaces(@RequestHeader("authorization") String header,
-                                                                       @PathVariable UUID planId){
+                                                                       @PathVariable UUID planId) {
         UUID id = commonJwtUtil.getUserIdFromToken(header);
         return ResponseEntity.ok(placeFacade.findPlanPlaces(id, planId));
     }
@@ -59,17 +59,24 @@ public class PlaceController {
     @PatchMapping("{placeId}")
     public ResponseEntity<PlaceResponse> updatePlace(@RequestHeader("authorization") String header,
                                                      @PathVariable Long placeId,
-                                                     @Valid @RequestBody UpdatePlaceRequest updatePlaceRequest){
+                                                     @Valid @RequestBody UpdatePlaceRequest updatePlaceRequest) {
         UUID id = commonJwtUtil.getUserIdFromToken(header);
         return ResponseEntity.ok(placeFacade.updatePlan(id, placeId, updatePlaceRequest.toApplicationRequest()));
     }
 
     @DeleteMapping
     public ResponseEntity<Void> deletePlaces(@RequestHeader("authorization") String header,
-                                             @RequestBody DeletePlacesRequest deletePlacesRequest){
+                                             @RequestBody DeletePlacesRequest deletePlacesRequest) {
         UUID id = commonJwtUtil.getUserIdFromToken(header);
         placeFacade.deletePlan(id, deletePlacesRequest.toApplicationRequest());
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{placeId}")
+    public ResponseEntity<PlaceResponse> findPlan(@RequestHeader("authorization") String header,
+                                                  @PathVariable Long placeId) {
+        UUID id = commonJwtUtil.getUserIdFromToken(header);
+        return ResponseEntity.ok(placeFacade.findPlan(id, placeId));
     }
 
 }

@@ -79,6 +79,16 @@ public class PlaceFacade {
         }
     }
 
+    public PlaceResponse findPlan(UUID id, Long placeId) {
+        userService.findUserById(id);
+
+        PinPlace place = placeService.findPlace(placeId);
+        boolean planPublic = planService.isPlanPublic(place.getPlanId());
+        List<PlanMember> planMembers = getPlanMembers(place.getPlanId());
+
+        return findPlaceService.find(placeId, id, planMembers, place.getPlanId(), planPublic);
+    }
+
     private List<PlanMember> getPlanMembers(UUID planId) {
         List<PlanMemberDTO> planMembers = planService.findPlanMembers(planId);
 
