@@ -1,8 +1,11 @@
 package com.pravell.place.application;
 
 import com.pravell.place.application.dto.request.SavePlaceApplicationRequest;
+import com.pravell.place.application.dto.request.UpdatePlaceApplicationRequest;
 import com.pravell.place.application.dto.response.FindPlanPlacesResponse;
+import com.pravell.place.application.dto.response.PlaceResponse;
 import com.pravell.place.application.dto.response.SavePlaceResponse;
+import com.pravell.place.domain.model.PinPlace;
 import com.pravell.place.domain.model.PlanMember;
 import com.pravell.place.domain.model.PlanMemberStatus;
 import com.pravell.plan.application.PlanService;
@@ -23,6 +26,8 @@ public class PlaceFacade {
     private final SavePlaceService savePlaceService;
     private final PlanService planService;
     private final FindPlaceService findPlaceService;
+    private final UpdatePlaceService updatePlaceService;
+    private final PlaceService placeService;
 
     public SavePlaceResponse savePlace(UUID id, SavePlaceApplicationRequest request) {
         userService.findUserById(id);
@@ -46,6 +51,16 @@ public class PlaceFacade {
         List<PlanMember> planMembers = getPlanMembers(planId);
 
         return findPlaceService.findAll(id, planId, planMembers, isPlanPublic);
+    }
+
+    public PlaceResponse updatePlan(UUID id, Long placeId, UpdatePlaceApplicationRequest request) {
+        userService.findUserById(id);
+
+        PinPlace place = placeService.findPlace(placeId);
+        planService.findPlan(place.getPlanId());
+        List<PlanMember> planMembers = getPlanMembers(place.getPlanId());
+
+        return updatePlaceService.update(place, planMembers, request, id);
     }
 
     private List<PlanMember> getPlanMembers(UUID planId) {

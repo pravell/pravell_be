@@ -7,45 +7,24 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.pravell.ControllerTestSupport;
 import com.pravell.place.domain.model.PinPlace;
-import com.pravell.place.domain.repository.PinPlaceRepository;
 import com.pravell.plan.domain.model.Plan;
 import com.pravell.plan.domain.model.PlanUserStatus;
 import com.pravell.plan.domain.model.PlanUsers;
-import com.pravell.plan.domain.repository.PlanRepository;
-import com.pravell.plan.domain.repository.PlanUsersRepository;
 import com.pravell.user.domain.model.User;
 import com.pravell.user.domain.model.UserStatus;
-import com.pravell.user.domain.repository.UserRepository;
-import java.math.BigDecimal;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ThreadLocalRandom;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
-class PlaceControllerFindAllTest extends ControllerTestSupport {
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private PlanRepository planRepository;
-
-    @Autowired
-    private PlanUsersRepository planUsersRepository;
-
-    @Autowired
-    private PinPlaceRepository pinPlaceRepository;
+class PlaceControllerFindAllTest extends PlaceControllerTestSupport {
 
     @AfterEach
     void tearDown() {
@@ -713,51 +692,5 @@ class PlaceControllerFindAllTest extends ControllerTestSupport {
                 .andExpect(jsonPath("$.message").value("유저를 찾을 수 없습니다."));
     }
 
-    private User getUser(UserStatus status) {
-        return User.builder()
-                .id(UUID.randomUUID())
-                .userId("userId" + UUID.randomUUID())
-                .nickname("nickname" + UUID.randomUUID())
-                .password("passworddd")
-                .status(status)
-                .build();
-    }
-
-    private Plan getPlan(boolean isDeleted, boolean isPublic) {
-        return Plan.builder()
-                .id(UUID.randomUUID())
-                .name("name")
-                .isDeleted(isDeleted)
-                .isPublic(isPublic)
-                .build();
-    }
-
-    private PlanUsers getPlanUsers(UUID planId, UUID userId, PlanUserStatus status) {
-        return PlanUsers.builder()
-                .planId(planId)
-                .userId(userId)
-                .planUserStatus(status)
-                .build();
-    }
-
-    private PinPlace getPinPlace(UUID planId) {
-        return PinPlace.builder()
-                .placeId(UUID.randomUUID().toString())
-                .nickname("nickname")
-                .title("title")
-                .address("addresss")
-                .roadAddress("addrdsss")
-                .mapx(String.valueOf((long) (ThreadLocalRandom.current().nextDouble(126.0, 130.0) * 1e7)))
-                .mapy(String.valueOf((long) (ThreadLocalRandom.current().nextDouble(33.0, 38.0) * 1e7)))
-                .pinColor("#324567")
-                .planId(planId)
-                .savedUser(UUID.randomUUID())
-                .lastRefreshedAt(LocalDateTime.now())
-                .description("description")
-                .hours("정보 없음")
-                .latitude(new BigDecimal("123.34256"))
-                .longitude(new BigDecimal("123.544567"))
-                .build();
-    }
 
 }

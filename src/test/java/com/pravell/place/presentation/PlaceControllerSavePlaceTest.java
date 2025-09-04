@@ -7,45 +7,26 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.pravell.ControllerTestSupport;
 import com.pravell.place.domain.model.PinPlace;
-import com.pravell.place.domain.repository.PinPlaceRepository;
 import com.pravell.place.presentation.request.SavePlaceRequest;
 import com.pravell.plan.domain.model.Plan;
 import com.pravell.plan.domain.model.PlanUserStatus;
 import com.pravell.plan.domain.model.PlanUsers;
-import com.pravell.plan.domain.repository.PlanRepository;
-import com.pravell.plan.domain.repository.PlanUsersRepository;
 import com.pravell.user.domain.model.User;
 import com.pravell.user.domain.model.UserStatus;
-import com.pravell.user.domain.repository.UserRepository;
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
-class PlaceControllerSavePlaceTest extends ControllerTestSupport {
-
-    @Autowired
-    private PinPlaceRepository pinPlaceRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private PlanRepository planRepository;
-
-    @Autowired
-    private PlanUsersRepository planUsersRepository;
+class PlaceControllerSavePlaceTest extends PlaceControllerTestSupport {
 
     @AfterEach
     void tearDown() {
@@ -485,33 +466,6 @@ class PlaceControllerSavePlaceTest extends ControllerTestSupport {
         assertThat(pinPlaceRepository.count()).isZero();
     }
 
-    private User getUser(UserStatus status) {
-        return User.builder()
-                .id(UUID.randomUUID())
-                .userId("userId" + UUID.randomUUID())
-                .nickname("nickname" + UUID.randomUUID())
-                .password("passworddd")
-                .status(status)
-                .build();
-    }
-
-    private Plan getPlan(boolean isDeleted) {
-        return Plan.builder()
-                .id(UUID.randomUUID())
-                .name("name")
-                .isDeleted(isDeleted)
-                .isPublic(true)
-                .build();
-    }
-
-    private PlanUsers getPlanUsers(UUID planId, UUID userId, PlanUserStatus status) {
-        return PlanUsers.builder()
-                .planId(planId)
-                .userId(userId)
-                .planUserStatus(status)
-                .build();
-    }
-
     private SavePlaceRequest getSavePlaceRequest(String address, UUID planId) {
         return SavePlaceRequest.builder()
                 .placeId(UUID.randomUUID().toString())
@@ -530,24 +484,5 @@ class PlaceControllerSavePlaceTest extends ControllerTestSupport {
                 .build();
     }
 
-    private PinPlace getPinPlace(String address, UUID planId) {
-        return PinPlace.builder()
-                .placeId(UUID.randomUUID().toString())
-                .nickname("nickname")
-                .title("title")
-                .address(address)
-                .roadAddress(address + " road")
-                .hours("hours")
-                .mapy("12345")
-                .mapy("123456")
-                .pinColor("#F54927")
-                .planId(planId)
-                .savedUser(UUID.randomUUID())
-                .description("description")
-                .lastRefreshedAt(LocalDateTime.now())
-                .latitude(new BigDecimal("123.44567"))
-                .longitude(new BigDecimal("123.23456"))
-                .build();
-    }
 
 }

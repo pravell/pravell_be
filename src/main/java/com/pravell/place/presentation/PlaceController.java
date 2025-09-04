@@ -4,15 +4,18 @@ import com.pravell.common.util.CommonJwtUtil;
 import com.pravell.place.application.PlaceFacade;
 import com.pravell.place.application.SearchPlaceService;
 import com.pravell.place.application.dto.response.FindPlanPlacesResponse;
+import com.pravell.place.application.dto.response.PlaceResponse;
 import com.pravell.place.application.dto.response.SavePlaceResponse;
 import com.pravell.place.application.dto.response.SearchPlaceResponse;
 import com.pravell.place.presentation.request.SavePlaceRequest;
+import com.pravell.place.presentation.request.UpdatePlaceRequest;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -49,6 +52,14 @@ public class PlaceController {
                                                                        @PathVariable UUID planId){
         UUID id = commonJwtUtil.getUserIdFromToken(header);
         return ResponseEntity.ok(placeFacade.findPlanPlaces(id, planId));
+    }
+
+    @PatchMapping("{placeId}")
+    public ResponseEntity<PlaceResponse> updatePlace(@RequestHeader("authorization") String header,
+                                                     @PathVariable Long placeId,
+                                                     @Valid @RequestBody UpdatePlaceRequest updatePlaceRequest){
+        UUID id = commonJwtUtil.getUserIdFromToken(header);
+        return ResponseEntity.ok(placeFacade.updatePlan(id, placeId, updatePlaceRequest.toApplicationRequest()));
     }
 
 }
