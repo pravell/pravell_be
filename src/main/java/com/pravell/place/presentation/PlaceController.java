@@ -3,6 +3,7 @@ package com.pravell.place.presentation;
 import com.pravell.common.util.CommonJwtUtil;
 import com.pravell.place.application.PlaceFacade;
 import com.pravell.place.application.SearchPlaceService;
+import com.pravell.place.application.dto.response.FindPlanPlacesResponse;
 import com.pravell.place.application.dto.response.SavePlaceResponse;
 import com.pravell.place.application.dto.response.SearchPlaceResponse;
 import com.pravell.place.presentation.request.SavePlaceRequest;
@@ -12,6 +13,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -40,6 +42,13 @@ public class PlaceController {
                                                        @Valid @RequestBody SavePlaceRequest savePlaceRequest){
         UUID id = commonJwtUtil.getUserIdFromToken(authorizationHeader);
         return ResponseEntity.ok(placeFacade.savePlace(id, savePlaceRequest.toApplicationRequest()));
+    }
+
+    @GetMapping("/{planId}")
+    public ResponseEntity<List<FindPlanPlacesResponse>> findPlanPlaces(@RequestHeader("authorization") String header,
+                                                                       @PathVariable UUID planId){
+        UUID id = commonJwtUtil.getUserIdFromToken(header);
+        return ResponseEntity.ok(placeFacade.findPlanPlaces(id, planId));
     }
 
 }

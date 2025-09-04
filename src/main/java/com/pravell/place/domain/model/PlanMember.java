@@ -8,5 +8,5 @@ import lombok.Getter;
 @Builder
 public class PlanMember {
     private UUID memberId;
-    private String planMemberStatus;
+    private PlanMemberStatus planMemberStatus;
 }

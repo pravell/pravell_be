@@ -43,13 +43,24 @@ public class PlanService {
         List<PlanUsers> planUsers = planUsersRepository.findAllByPlanId(planId);
 
         return planUsers.stream().filter(pu -> pu.getPlanUserStatus().equals(PlanUserStatus.MEMBER) ||
-                        pu.getPlanUserStatus().equals(PlanUserStatus.OWNER))
+                        pu.getPlanUserStatus().equals(PlanUserStatus.OWNER) ||
+                        pu.getPlanUserStatus().equals(PlanUserStatus.BLOCKED))
                 .map(p -> {
                     return PlanMemberDTO.builder()
                             .memberId(p.getUserId())
                             .planMemberStatus(p.getPlanUserStatus().name())
                             .build();
                 }).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public boolean isPlanPublic(UUID planId){
+        Optional<Plan> plan = planRepository.findById(planId);
+        if (plan.isEmpty() || plan.get().getIsDeleted() == true) {
+            throw new PlanNotFoundException("플랜을 찾을 수 없습니다.");
+        }
+
+        return plan.get().getIsPublic();
     }
 
 }

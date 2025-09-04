@@ -6,6 +6,7 @@ import com.pravell.common.exception.AccessDeniedException;
 import com.pravell.place.application.dto.request.SavePlaceApplicationRequest;
 import com.pravell.place.domain.model.PinPlace;
 import com.pravell.place.domain.model.PlanMember;
+import com.pravell.place.domain.model.PlanMemberStatus;
 import com.pravell.place.domain.repository.PinPlaceRepository;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -63,7 +64,8 @@ public class SavePlaceService {
     }
 
     private void validatePlaceSave(UUID id, List<PlanMember> planMembers, UUID planId) {
-        boolean isMember = planMembers.stream().anyMatch(pm -> pm.getMemberId().equals(id));
+        boolean isMember = planMembers.stream().anyMatch(pm -> pm.getMemberId().equals(id) &&
+                !pm.getPlanMemberStatus().equals(PlanMemberStatus.BLOCKED));
 
         if (!isMember) {
             log.info("{} 유저는 {} 플랜에 장소를 저장 할 권한이 없습니다.", id, planId);

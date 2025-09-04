@@ -1,5 +1,7 @@
 package com.pravell.place.domain.model;
 
+import com.pravell.place.application.dto.response.api.GooglePlaceDetailsResponse;
+import com.pravell.place.application.dto.response.api.NaverPlaceResponse;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -50,4 +52,15 @@ public class PinPlace {
 
     @Column(precision = 10, scale = 7)
     private BigDecimal longitude;
+
+    public void updateFromApis(NaverPlaceResponse naver, GooglePlaceDetailsResponse google, String hours) {
+        this.title = naver.getTitle();
+        this.address = naver.getAddress();
+        this.roadAddress = naver.getRoadAddress();
+        this.latitude = google.getLatitude();
+        this.longitude = google.getLongitude();
+        this.hours = hours;
+        this.lastRefreshedAt = LocalDateTime.now();
+    }
+
 }

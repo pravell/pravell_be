@@ -1,8 +1,10 @@
 package com.pravell.place.application;
 
 import com.pravell.place.application.dto.request.SavePlaceApplicationRequest;
+import com.pravell.place.application.dto.response.FindPlanPlacesResponse;
 import com.pravell.place.application.dto.response.SavePlaceResponse;
 import com.pravell.place.domain.model.PlanMember;
+import com.pravell.place.domain.model.PlanMemberStatus;
 import com.pravell.plan.application.PlanService;
 import com.pravell.plan.application.dto.PlanMemberDTO;
 import com.pravell.user.application.UserService;
@@ -20,6 +22,7 @@ public class PlaceFacade {
     private final UserService userService;
     private final SavePlaceService savePlaceService;
     private final PlanService planService;
+    private final FindPlaceService findPlaceService;
 
     public SavePlaceResponse savePlace(UUID id, SavePlaceApplicationRequest request) {
         userService.findUserById(id);
@@ -36,6 +39,15 @@ public class PlaceFacade {
                 .build();
     }
 
+    public List<FindPlanPlacesResponse> findPlanPlaces(UUID id, UUID planId) {
+        userService.findUserById(id);
+
+        boolean isPlanPublic = planService.isPlanPublic(planId);
+        List<PlanMember> planMembers = getPlanMembers(planId);
+
+        return findPlaceService.findAll(id, planId, planMembers, isPlanPublic);
+    }
+
     private List<PlanMember> getPlanMembers(UUID planId) {
         List<PlanMemberDTO> planMembers = planService.findPlanMembers(planId);
 
@@ -43,10 +55,9 @@ public class PlaceFacade {
                 pm -> {
                     return PlanMember.builder()
                             .memberId(pm.getMemberId())
-                            .planMemberStatus(pm.getPlanMemberStatus())
+                            .planMemberStatus(PlanMemberStatus.valueOf(pm.getPlanMemberStatus()))
                             .build();
                 }
         ).toList();
     }
-
 }
