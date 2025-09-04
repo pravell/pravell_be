@@ -33,3 +33,24 @@ invite-code:
   characters: ${INVITE_CODE_CHARACTERS}
   length: ${INVITE_CODE_LENGTH}
   expires: ${INVITE_CODE_EXPIRES}
+
+naver:
+  search:
+    api:
+      url: ${NAVER_SEARCH_API_URL}
+      client-id: ${NAVER_SEARCH_CLIENT_ID}
+      client-secret: ${NAVER_SEARCH_CLIENT_SECRET}
+  map:
+    url: ${NAVER_MAP_URL}
+
+google:
+  api:
+    key: ${GOOGLE_API_KEY}
+    search:
+      url-prefix: ${GOOGLE_SEARCH_API_URL_PREFIX}
+      url-params: ${GOOGLE_SEARCH_API_URL_PARAMS}
+    detail:
+      url-prefix: ${GOOGLE_DETAIL_API_URL_PREFIX}
+      url-params: ${GOOGLE_DETAIL_API_URL_PARAMS}
+
+
