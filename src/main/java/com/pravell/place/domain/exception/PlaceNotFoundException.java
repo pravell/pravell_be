@@ -1,4 +1,4 @@
-package com.pravell.place.domain;
+package com.pravell.place.domain.exception;
 
 import com.pravell.common.exception.NotFoundException;
 

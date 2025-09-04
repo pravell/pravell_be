@@ -6,12 +6,10 @@ import com.pravell.place.domain.model.PinPlace;
 import com.pravell.place.domain.model.PlanMember;
 import com.pravell.place.domain.model.PlanMemberStatus;
 import com.pravell.place.domain.repository.PinPlaceRepository;
-import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,13 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class FindPlaceService {
 
     private final PinPlaceRepository pinPlaceRepository;
-    private final NaverSearchApi naverSearchApi;
-    private final GoogleSearchApi googleSearchApi;
-
-    @Value("${naver.map.url}")
-    private String mapUrl;
-
-    private static final Duration REFRESH_THRESHOLD = Duration.ofDays(15);
 
     @Transactional(readOnly = true)
     public List<FindPlanPlacesResponse> findAll(UUID userId, UUID planId, List<PlanMember> planMembers,

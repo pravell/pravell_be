@@ -1,6 +1,6 @@
 package com.pravell.place.application;
 
-import com.pravell.place.domain.PlaceNotFoundException;
+import com.pravell.place.domain.exception.PlaceNotFoundException;
 import com.pravell.place.domain.model.PinPlace;
 import com.pravell.place.domain.repository.PinPlaceRepository;
 import lombok.RequiredArgsConstructor;
