@@ -16,6 +16,6 @@ public class PlaceService {
     @Transactional(readOnly = true)
     public PinPlace findPlace(Long placeId) {
         return pinPlaceRepository.findById(placeId)
-                .orElseThrow(()->new PlaceNotFoundException("장소를 찾을 수 없습니다."));
+                .orElseThrow(() -> new PlaceNotFoundException("장소를 찾을 수 없습니다."));
     }
 }

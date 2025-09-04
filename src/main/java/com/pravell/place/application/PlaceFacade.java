@@ -1,5 +1,6 @@
 package com.pravell.place.application;
 
+import com.pravell.place.application.dto.request.DeletePlacesApplicationRequest;
 import com.pravell.place.application.dto.request.SavePlaceApplicationRequest;
 import com.pravell.place.application.dto.request.UpdatePlaceApplicationRequest;
 import com.pravell.place.application.dto.response.FindPlanPlacesResponse;
@@ -16,6 +17,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +30,7 @@ public class PlaceFacade {
     private final FindPlaceService findPlaceService;
     private final UpdatePlaceService updatePlaceService;
     private final PlaceService placeService;
+    private final DeletePlaceService deletePlaceService;
 
     public SavePlaceResponse savePlace(UUID id, SavePlaceApplicationRequest request) {
         userService.findUserById(id);
@@ -61,6 +64,19 @@ public class PlaceFacade {
         List<PlanMember> planMembers = getPlanMembers(place.getPlanId());
 
         return updatePlaceService.update(place, planMembers, request, id);
+    }
+
+    @Transactional
+    public void deletePlan(UUID id, DeletePlacesApplicationRequest request) {
+        userService.findUserById(id);
+
+        for (Long placeId : request.getPlaceId()) {
+            PinPlace place = placeService.findPlace(placeId);
+            planService.findPlan(place.getPlanId());
+            List<PlanMember> planMembers = getPlanMembers(place.getPlanId());
+
+            deletePlaceService.delete(place, planMembers, id);
+        }
     }
 
     private List<PlanMember> getPlanMembers(UUID planId) {

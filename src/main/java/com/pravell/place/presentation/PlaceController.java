@@ -7,6 +7,7 @@ import com.pravell.place.application.dto.response.FindPlanPlacesResponse;
 import com.pravell.place.application.dto.response.PlaceResponse;
 import com.pravell.place.application.dto.response.SavePlaceResponse;
 import com.pravell.place.application.dto.response.SearchPlaceResponse;
+import com.pravell.place.presentation.request.DeletePlacesRequest;
 import com.pravell.place.presentation.request.SavePlaceRequest;
 import com.pravell.place.presentation.request.UpdatePlaceRequest;
 import jakarta.validation.Valid;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -60,6 +62,14 @@ public class PlaceController {
                                                      @Valid @RequestBody UpdatePlaceRequest updatePlaceRequest){
         UUID id = commonJwtUtil.getUserIdFromToken(header);
         return ResponseEntity.ok(placeFacade.updatePlan(id, placeId, updatePlaceRequest.toApplicationRequest()));
+    }
+
+    @DeleteMapping
+    public ResponseEntity<Void> deletePlaces(@RequestHeader("authorization") String header,
+                                             @RequestBody DeletePlacesRequest deletePlacesRequest){
+        UUID id = commonJwtUtil.getUserIdFromToken(header);
+        placeFacade.deletePlan(id, deletePlacesRequest.toApplicationRequest());
+        return ResponseEntity.noContent().build();
     }
 
 }
