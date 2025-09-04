@@ -127,11 +127,11 @@ class SearchPlaceServiceTest {
         }
     }
 
-    private NaverPlaceResponse createNaverResponse(String title, String address, String roanAddress) {
+    private NaverPlaceResponse createNaverResponse(String title, String address, String roadAddress) {
         return NaverPlaceResponse.builder()
                 .title(title)
                 .address(address)
-                .roadAddress(roanAddress)
+                .roadAddress(roadAddress)
                 .build();
     }
 

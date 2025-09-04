@@ -39,7 +39,7 @@ public abstract class ControllerTestSupport {
         return Jwts.builder()
                 .subject(userId.toString())
                 .issuer(iss)
-                .claim("userId", userId.toString())
+                .claim("id", userId.toString())
                 .claim("typ", typ)
                 .expiration(Date.from(exp))
                 .issuedAt(new Date())

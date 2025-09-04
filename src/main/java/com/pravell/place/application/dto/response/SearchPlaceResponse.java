@@ -16,7 +16,7 @@ public class SearchPlaceResponse {
 
     private String title;
     private String address;
-    private String roanAddress;
+    private String roadAddress;
     private List<String> holiday;
     private BigDecimal lat;
     private BigDecimal lng;

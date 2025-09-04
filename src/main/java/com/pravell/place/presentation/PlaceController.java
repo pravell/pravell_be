@@ -1,13 +1,19 @@
 package com.pravell.place.presentation;
 
 import com.pravell.common.util.CommonJwtUtil;
+import com.pravell.place.application.PlaceFacade;
 import com.pravell.place.application.SearchPlaceService;
+import com.pravell.place.application.dto.response.SavePlaceResponse;
 import com.pravell.place.application.dto.response.SearchPlaceResponse;
+import com.pravell.place.presentation.request.SavePlaceRequest;
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -20,12 +26,20 @@ public class PlaceController {
 
     private final CommonJwtUtil commonJwtUtil;
     private final SearchPlaceService searchPlaceService;
+    private final PlaceFacade placeFacade;
 
     @GetMapping("/search")
     public ResponseEntity<List<SearchPlaceResponse>> searchPlace(@RequestParam String keyword,
-                                                                 @RequestHeader("authorization") String authorizationHeader){
+                                                                 @RequestHeader("authorization") String authorizationHeader) {
         UUID id = commonJwtUtil.getUserIdFromToken(authorizationHeader);
         return ResponseEntity.ok(searchPlaceService.search(keyword, id));
+    }
+
+    @PostMapping
+    public ResponseEntity<SavePlaceResponse> savePlace(@RequestHeader("authorization") String authorizationHeader,
+                                                       @Valid @RequestBody SavePlaceRequest savePlaceRequest){
+        UUID id = commonJwtUtil.getUserIdFromToken(authorizationHeader);
+        return ResponseEntity.ok(placeFacade.savePlace(id, savePlaceRequest.toApplicationRequest()));
     }
 
 }
