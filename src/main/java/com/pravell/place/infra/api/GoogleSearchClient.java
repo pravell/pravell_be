@@ -53,8 +53,14 @@ public class GoogleSearchClient implements GoogleSearchApi {
         ResponseEntity<GoogleSearchResponse> detailResponse = restTemplate.getForEntity(detailUrl,
                 GoogleSearchResponse.class);
 
-        return Optional.ofNullable(detailResponse.getBody())
+        GooglePlaceDetailsResponse googlePlaceDetailsResponse = Optional.ofNullable(detailResponse.getBody())
                 .map(GoogleSearchResponse::getResult)
                 .orElse(null);
+
+        if (googlePlaceDetailsResponse!=null){
+            googlePlaceDetailsResponse.setPlaceId(placeId);
+        }
+
+        return googlePlaceDetailsResponse;
     }
 }

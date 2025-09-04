@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class SearchPlaceResponse {
 
+    private String placeId;
     private String title;
     private String address;
     private String roadAddress;
@@ -24,7 +25,8 @@ public class SearchPlaceResponse {
     private String mapy;
     private String mapUrl;
 
-    public static SearchPlaceResponse of(NaverPlaceResponse n, GooglePlaceDetailsResponse g, String mapUrl) {
+    public static SearchPlaceResponse of(NaverPlaceResponse n, GooglePlaceDetailsResponse g, String mapUrl,
+                                         String placeId) {
         List<String> holidays = Optional.ofNullable(g)
                 .map(GooglePlaceDetailsResponse::getOpeningHours)
                 .orElse(List.of("정보 없음"));
@@ -43,6 +45,7 @@ public class SearchPlaceResponse {
         }
 
         return new SearchPlaceResponse(
+                placeId,
                 n.cleanTitle(),
                 n.getAddress(),
                 n.getRoadAddress(),

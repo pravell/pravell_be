@@ -24,13 +24,13 @@ public class SearchPlaceService {
     public List<SearchPlaceResponse> search(String keyword, UUID id) {
         log.info("{} 유저가 {} 키워드로 검색.", id, keyword);
 
-        List<NaverPlaceResponse> naverResults=naverSearchApi.search(keyword);
+        List<NaverPlaceResponse> naverResults = naverSearchApi.search(keyword);
 
-        return naverResults.stream().map(n->{
+        return naverResults.stream().map(n -> {
             GooglePlaceDetailsResponse response = googleSearchApi.getDetails(n.getTitle(), n.getRoadAddress());
-            String url = mapUrl+ n.cleanTitle().replaceAll("\\s+", "");
+            String url = mapUrl + n.cleanTitle().replaceAll("\\s+", "");
 
-            return SearchPlaceResponse.of(n, response, url);
+            return SearchPlaceResponse.of(n, response, url, response == null ? null : response.getPlaceId());
         }).toList();
     }
 

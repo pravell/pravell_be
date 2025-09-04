@@ -12,6 +12,7 @@ public class GooglePlaceDetailsResponse {
 
     private Geometry geometry;
     private OpeningHours opening_hours;
+    private String placeId;
 
     public BigDecimal getLatitude() {
         return geometry.location.lat;
