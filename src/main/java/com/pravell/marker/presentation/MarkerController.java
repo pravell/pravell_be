@@ -3,12 +3,16 @@ package com.pravell.marker.presentation;
 import com.pravell.common.util.CommonJwtUtil;
 import com.pravell.marker.application.MarkerFacade;
 import com.pravell.marker.application.dto.response.CreateMarkerResponse;
+import com.pravell.marker.application.dto.response.FindMarkersResponse;
 import com.pravell.marker.presentation.request.CreateMarkerRequest;
 import jakarta.validation.Valid;
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -29,6 +33,13 @@ public class MarkerController {
         UUID id = commonJwtUtil.getUserIdFromToken(header);
         CreateMarkerResponse response = markerFacade.createMarker(id, createMarkerRequest.toApplicationRequest());
         return ResponseEntity.created(URI.create("/markers/" + response.getMarkerId())).body(response);
+    }
+
+    @GetMapping("/{planId}")
+    public ResponseEntity<List<FindMarkersResponse>> findMarkers(@RequestHeader("authorization") String header,
+                                                                 @PathVariable UUID planId) {
+        UUID id = commonJwtUtil.getUserIdFromToken(header);
+        return ResponseEntity.ok(markerFacade.findMarkers(id, planId));
     }
 
 }

@@ -1,6 +1,7 @@
 package com.pravell.marker.presentation;
 
 import com.pravell.ControllerTestSupport;
+import com.pravell.marker.domain.model.Marker;
 import com.pravell.marker.domain.repository.MarkerRepository;
 import com.pravell.plan.domain.model.Plan;
 import com.pravell.plan.domain.model.PlanUserStatus;
@@ -55,6 +56,14 @@ public abstract class MarkerControllerTestSupport extends ControllerTestSupport 
                 .planId(planId)
                 .userId(userId)
                 .planUserStatus(status)
+                .build();
+    }
+
+    protected Marker getMarker(UUID planId, String color, String description){
+        return Marker.builder()
+                .planId(planId)
+                .description(description)
+                .color(color)
                 .build();
     }
 

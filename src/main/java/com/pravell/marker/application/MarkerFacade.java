@@ -2,6 +2,7 @@ package com.pravell.marker.application;
 
 import com.pravell.marker.application.dto.request.CreateMarkerApplicationRequest;
 import com.pravell.marker.application.dto.response.CreateMarkerResponse;
+import com.pravell.marker.application.dto.response.FindMarkersResponse;
 import com.pravell.marker.domain.model.PlanMember;
 import com.pravell.marker.domain.model.PlanMemberStatus;
 import com.pravell.plan.application.PlanService;
@@ -19,6 +20,7 @@ public class MarkerFacade {
     private final UserService userService;
     private final PlanService planService;
     private final CreateMarkerService createMarkerService;
+    private final FindMarkerService findMarkerService;
 
     public CreateMarkerResponse createMarker(UUID id, CreateMarkerApplicationRequest request) {
         userService.findUserById(id);
@@ -27,6 +29,15 @@ public class MarkerFacade {
         List<PlanMember> planMembers = getPlanMembers(request.getPlanId());
 
         return createMarkerService.create(id, planMembers, request);
+    }
+
+    public List<FindMarkersResponse> findMarkers(UUID id, UUID planId) {
+        userService.findUserById(id);
+
+        boolean planPublic = planService.isPlanPublic(planId);
+        List<PlanMember> planMembers = getPlanMembers(planId);
+
+        return findMarkerService.getMarkersOfPlan(id, planPublic, planMembers, planId);
     }
 
     private List<PlanMember> getPlanMembers(UUID planId) {
@@ -41,5 +52,4 @@ public class MarkerFacade {
                 }
         ).toList();
     }
-
 }
