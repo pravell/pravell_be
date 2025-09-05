@@ -2,9 +2,10 @@ package com.pravell.marker.presentation;
 
 import com.pravell.common.util.CommonJwtUtil;
 import com.pravell.marker.application.MarkerFacade;
-import com.pravell.marker.application.dto.response.CreateMarkerResponse;
+import com.pravell.marker.application.dto.response.MarkerResponse;
 import com.pravell.marker.application.dto.response.FindMarkersResponse;
 import com.pravell.marker.presentation.request.CreateMarkerRequest;
+import com.pravell.marker.presentation.request.UpdateMarkerRequest;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,10 +30,10 @@ public class MarkerController {
     private final MarkerFacade markerFacade;
 
     @PostMapping
-    public ResponseEntity<CreateMarkerResponse> createMarker(@RequestHeader("authorization") String header,
-                                                             @Valid @RequestBody CreateMarkerRequest createMarkerRequest) {
+    public ResponseEntity<MarkerResponse> createMarker(@RequestHeader("authorization") String header,
+                                                       @Valid @RequestBody CreateMarkerRequest createMarkerRequest) {
         UUID id = commonJwtUtil.getUserIdFromToken(header);
-        CreateMarkerResponse response = markerFacade.createMarker(id, createMarkerRequest.toApplicationRequest());
+        MarkerResponse response = markerFacade.createMarker(id, createMarkerRequest.toApplicationRequest());
         return ResponseEntity.created(URI.create("/markers/" + response.getMarkerId())).body(response);
     }
 
@@ -40,6 +42,14 @@ public class MarkerController {
                                                                  @PathVariable UUID planId) {
         UUID id = commonJwtUtil.getUserIdFromToken(header);
         return ResponseEntity.ok(markerFacade.findMarkers(id, planId));
+    }
+
+    @PatchMapping("/{markerId}")
+    public ResponseEntity<MarkerResponse> updateMarker(@RequestHeader("authorization") String header,
+                                                       @PathVariable Long markerId,
+                                                       @Valid @RequestBody UpdateMarkerRequest updateMarkerRequest) {
+        UUID id = commonJwtUtil.getUserIdFromToken(header);
+        return ResponseEntity.ok(markerFacade.updateMarker(id, markerId, updateMarkerRequest.toApplicationRequest()));
     }
 
 }

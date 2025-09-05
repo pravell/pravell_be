@@ -21,7 +21,7 @@ public class CreateMarkerRequest {
     private String color;
 
     @NotBlank(message = "description은 생략이 불가능합니다.")
-    @Size(min = 2, max = 255, message = "description은 2 ~ 30자여야 합니다.")
+    @Size(min = 2, max = 30, message = "description은 2 ~ 30자여야 합니다.")
     private String description;
 
     public CreateMarkerApplicationRequest toApplicationRequest(){

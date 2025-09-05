@@ -47,6 +47,16 @@ public class Marker extends AggregateRoot {
                 .build();
     }
 
+    public void updateColor(String color) {
+        validateColor(color);
+        this.color = color;
+    }
+
+    public void updateDescription(String description) {
+        validateDescription(description);
+        this.description = description;
+    }
+
     private static void validateDescription(String description) {
         if (description == null || description.length() < 2 || description.length() > 30) {
             throw new IllegalArgumentException("description은 2 ~ 30자여야 합니다.");
@@ -64,5 +74,4 @@ public class Marker extends AggregateRoot {
             throw new IllegalArgumentException("planId는 생략이 불가능합니다.");
         }
     }
-
 }

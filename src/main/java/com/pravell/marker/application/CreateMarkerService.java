@@ -2,7 +2,7 @@ package com.pravell.marker.application;
 
 import com.pravell.common.exception.AccessDeniedException;
 import com.pravell.marker.application.dto.request.CreateMarkerApplicationRequest;
-import com.pravell.marker.application.dto.response.CreateMarkerResponse;
+import com.pravell.marker.application.dto.response.MarkerResponse;
 import com.pravell.marker.domain.model.Marker;
 import com.pravell.marker.domain.model.PlanMember;
 import com.pravell.marker.domain.repository.MarkerRepository;
@@ -23,7 +23,7 @@ public class CreateMarkerService {
     private final MarkerAuthorizationService markerAuthorizationService;
 
     @Transactional
-    public CreateMarkerResponse create(UUID id, List<PlanMember> planMembers, CreateMarkerApplicationRequest request) {
+    public MarkerResponse create(UUID id, List<PlanMember> planMembers, CreateMarkerApplicationRequest request) {
         validateCreateMarker(id, planMembers, request.getPlanId());
 
         log.info("유저 {}가 {} 플랜에 마커를 생성했습니다.", id, request.getPlanId());
@@ -41,8 +41,8 @@ public class CreateMarkerService {
         }
     }
 
-    private CreateMarkerResponse buildCreateMarkerResponse(Marker saved) {
-        return CreateMarkerResponse.builder()
+    private MarkerResponse buildCreateMarkerResponse(Marker saved) {
+        return MarkerResponse.builder()
                 .markerId(saved.getId())
                 .planId(saved.getPlanId())
                 .color(saved.getColor())

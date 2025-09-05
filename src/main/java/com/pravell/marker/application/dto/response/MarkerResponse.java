@@ -6,7 +6,7 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class CreateMarkerResponse {
+public class MarkerResponse {
 
     private Long markerId;
     private UUID planId;
