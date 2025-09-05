@@ -19,9 +19,13 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
@@ -36,9 +40,10 @@ class PlaceControllerSavePlaceTest extends PlaceControllerTestSupport {
         planUsersRepository.deleteAllInBatch();
     }
 
-    @DisplayName("플랜의 MEMBER일 경우, 플랜에 성공적으로 장소를 저장한다.")
-    @Test
-    void shouldSavePlaceToPlan_whenUserIsMember() throws Exception {
+    @DisplayName("플랜의 멤버, 오너일 경우, 플랜에 성공적으로 장소를 저장한다.")
+    @ParameterizedTest
+    @MethodSource("provideOwnerAndMemberStatuses")
+    void shouldSavePlace_whenUserIsOwnerOrMemberOfPlan(String role, PlanUserStatus planUserStatus) throws Exception {
         //given
         User user = getUser(UserStatus.ACTIVE);
         userRepository.save(user);
@@ -46,7 +51,7 @@ class PlaceControllerSavePlaceTest extends PlaceControllerTestSupport {
         Plan plan = getPlan(false);
         planRepository.save(plan);
 
-        PlanUsers planUsers = getPlanUsers(plan.getId(), user.getId(), PlanUserStatus.MEMBER);
+        PlanUsers planUsers = getPlanUsers(plan.getId(), user.getId(), planUserStatus);
         planUsersRepository.save(planUsers);
 
         SavePlaceRequest request = getSavePlaceRequest("경상북도 경주시 탑동 xxx", plan.getId());
@@ -75,54 +80,29 @@ class PlaceControllerSavePlaceTest extends PlaceControllerTestSupport {
         assertThat(after.get().getPlanId()).isEqualTo(plan.getId());
     }
 
-    @DisplayName("플랜의 OWNER일 경우, 플랜에 성공적으로 장소를 저장한다.")
-    @Test
-    void shouldSavePlaceToPlan_whenUserIsOwner() throws Exception {
-        //given
-        User user = getUser(UserStatus.ACTIVE);
-        userRepository.save(user);
-
-        Plan plan = getPlan(false);
-        planRepository.save(plan);
-
-        PlanUsers planUsers = getPlanUsers(plan.getId(), user.getId(), PlanUserStatus.OWNER);
-        planUsersRepository.save(planUsers);
-
-        SavePlaceRequest request = getSavePlaceRequest("경상북도 경주시 탑동 xxx", plan.getId());
-
-        String token = buildToken(user.getId(), "access", issuer, Instant.now().plusSeconds(10000));
-
-        //when, then
-        MvcResult mvcResult = mockMvc.perform(
-                        post("/api/v1/places")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsBytes(request))
-                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.pinPlaceId").isNotEmpty())
-                .andReturn();
-
-        String responseBody = mvcResult.getResponse().getContentAsString();
-        ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode jsonNode = objectMapper.readTree(responseBody);
-        Long placeId = jsonNode.get("pinPlaceId").asLong();
-
-        Optional<PinPlace> after = pinPlaceRepository.findById(placeId);
-        assertThat(after).isPresent();
-        assertThat(after.get().getAddress()).isEqualTo(request.getAddress());
-        assertThat(after.get().getSavedUser()).isEqualTo(user.getId());
-        assertThat(after.get().getPlanId()).isEqualTo(plan.getId());
+    private static Stream<Arguments> provideOwnerAndMemberStatuses() {
+        return Stream.of(
+                Arguments.of("멤버", PlanUserStatus.MEMBER),
+                Arguments.of("오너", PlanUserStatus.OWNER)
+        );
     }
 
-    @DisplayName("플랜에 속해있지 않은 유저는 플랜에 장소를 저장하지 못하고, 403을 반환한다.")
-    @Test
-    void shouldThrowAccessDeniedException_whenUserNotInPlanTriesToSavePlace() throws Exception {
+    @DisplayName("플랜에서 탈퇴한 유저, 퇴출당한 유저, 차단된 유저, 비참여자일 경우 플랜에 장소를 저장하지 못하고 403을 반환한다.")
+    @ParameterizedTest(name = "[{index}] 권한 : {0}")
+    @MethodSource("provideUnauthorizedStatuses")
+    void shouldReturn403_whenUnauthorizedUserTriesToSavePlace(String role, PlanUserStatus planUserStatus)
+            throws Exception {
         //given
         User user = getUser(UserStatus.ACTIVE);
         userRepository.save(user);
 
         Plan plan = getPlan(false);
         planRepository.save(plan);
+
+        if (planUserStatus != null) {
+            PlanUsers planUsers = getPlanUsers(plan.getId(), user.getId(), planUserStatus);
+            planUsersRepository.save(planUsers);
+        }
 
         SavePlaceRequest request = getSavePlaceRequest("경상북도 경주시 탑동 xxx", plan.getId());
 
@@ -141,94 +121,13 @@ class PlaceControllerSavePlaceTest extends PlaceControllerTestSupport {
         assertThat(pinPlaceRepository.count()).isZero();
     }
 
-    @DisplayName("플랜에서 탈퇴한 유저는 장소를 저장하지 못하고, 403을 반환한다.")
-    @Test
-    void shouldReturn403_whenWithdrawnUserTriesToSavePlaceToPlan() throws Exception {
-        //given
-        User user = getUser(UserStatus.ACTIVE);
-        userRepository.save(user);
-
-        Plan plan = getPlan(false);
-        planRepository.save(plan);
-
-        PlanUsers planUsers = getPlanUsers(plan.getId(), user.getId(), PlanUserStatus.WITHDRAWN);
-        planUsersRepository.save(planUsers);
-
-        SavePlaceRequest request = getSavePlaceRequest("경상북도 경주시 탑동 xxx", plan.getId());
-
-        String token = buildToken(user.getId(), "access", issuer, Instant.now().plusSeconds(10000));
-
-        //when, then
-        mockMvc.perform(
-                        post("/api/v1/places")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsBytes(request))
-                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
-                .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.code").value("Forbidden"))
-                .andExpect(jsonPath("$.message").value("해당 플랜에 장소를 저장 할 권한이 없습니다."));
-
-        assertThat(pinPlaceRepository.count()).isZero();
-    }
-
-    @DisplayName("플랜에서 퇴출당한 유저는 장소를 저장하지 못하고, 403을 반환한다.")
-    @Test
-    void shouldReturn403_whenKickedUserTriesToSavePlaceToPlan() throws Exception {
-        //given
-        User user = getUser(UserStatus.ACTIVE);
-        userRepository.save(user);
-
-        Plan plan = getPlan(false);
-        planRepository.save(plan);
-
-        PlanUsers planUsers = getPlanUsers(plan.getId(), user.getId(), PlanUserStatus.KICKED);
-        planUsersRepository.save(planUsers);
-
-        SavePlaceRequest request = getSavePlaceRequest("경상북도 경주시 탑동 xxx", plan.getId());
-
-        String token = buildToken(user.getId(), "access", issuer, Instant.now().plusSeconds(10000));
-
-        //when, then
-        mockMvc.perform(
-                        post("/api/v1/places")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsBytes(request))
-                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
-                .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.code").value("Forbidden"))
-                .andExpect(jsonPath("$.message").value("해당 플랜에 장소를 저장 할 권한이 없습니다."));
-
-        assertThat(pinPlaceRepository.count()).isZero();
-    }
-
-    @DisplayName("플랜에서 차단당한 유저는 장소를 저장하지 못하고, 403을 반환한다.")
-    @Test
-    void shouldReturn403_whenBlockedUserTriesToSavePlaceToPlan() throws Exception {
-        //given
-        User user = getUser(UserStatus.ACTIVE);
-        userRepository.save(user);
-
-        Plan plan = getPlan(false);
-        planRepository.save(plan);
-
-        PlanUsers planUsers = getPlanUsers(plan.getId(), user.getId(), PlanUserStatus.BLOCKED);
-        planUsersRepository.save(planUsers);
-
-        SavePlaceRequest request = getSavePlaceRequest("경상북도 경주시 탑동 xxx", plan.getId());
-
-        String token = buildToken(user.getId(), "access", issuer, Instant.now().plusSeconds(10000));
-
-        //when, then
-        mockMvc.perform(
-                        post("/api/v1/places")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsBytes(request))
-                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
-                .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.code").value("Forbidden"))
-                .andExpect(jsonPath("$.message").value("해당 플랜에 장소를 저장 할 권한이 없습니다."));
-
-        assertThat(pinPlaceRepository.count()).isZero();
+    private static Stream<Arguments> provideUnauthorizedStatuses() {
+        return Stream.of(
+                Arguments.of("탈퇴한 유저", PlanUserStatus.WITHDRAWN),
+                Arguments.of("퇴출당한 유저", PlanUserStatus.KICKED),
+                Arguments.of("차단된 유저", PlanUserStatus.BLOCKED),
+                Arguments.of("비참여자", null)
+        );
     }
 
     @DisplayName("해당 장소가 이미 저장되어있으면 장소를 중복해서 저장하지 못하고, 409를 반환한다.")
@@ -346,11 +245,12 @@ class PlaceControllerSavePlaceTest extends PlaceControllerTestSupport {
         assertThat(pinPlaceRepository.count()).isZero();
     }
 
-    @DisplayName("유저가 이미 탈퇴했으면 장소를 저장하지 못하고, 404를 반환한다.")
-    @Test
-    void shouldReturn404_whenWithdrawnUserTriesToSavePlaceToPlan() throws Exception {
+    @DisplayName("탈퇴, 삭제, 정지, 차단된 유저는 장소 저장에 실패하고 404를 반환한다.")
+    @ParameterizedTest(name = "[{index}] 권한 : {0}")
+    @MethodSource("provideInactiveUserStatuses")
+    void shouldReturn404_whenInactiveUserTriesToSavePlace(String role, UserStatus userStatus) throws Exception {
         //given
-        User user = getUser(UserStatus.WITHDRAWN);
+        User user = getUser(userStatus);
         userRepository.save(user);
 
         Plan plan = getPlan(false);
@@ -376,94 +276,13 @@ class PlaceControllerSavePlaceTest extends PlaceControllerTestSupport {
         assertThat(pinPlaceRepository.count()).isZero();
     }
 
-    @DisplayName("유저가 이미 삭제되었으면 장소를 저장하지 못하고, 404를 반환한다.")
-    @Test
-    void shouldReturn404_whenDeletedUserTriesToSavePlaceToPlan() throws Exception {
-        //given
-        User user = getUser(UserStatus.DELETED);
-        userRepository.save(user);
-
-        Plan plan = getPlan(false);
-        planRepository.save(plan);
-
-        PlanUsers planUsers = getPlanUsers(plan.getId(), user.getId(), PlanUserStatus.MEMBER);
-        planUsersRepository.save(planUsers);
-
-        SavePlaceRequest request = getSavePlaceRequest("경상북도 경주시 탑동 xxx", plan.getId());
-
-        String token = buildToken(user.getId(), "access", issuer, Instant.now().plusSeconds(10000));
-
-        //when, then
-        mockMvc.perform(
-                        post("/api/v1/places")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsBytes(request))
-                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.code").value("Not Found"))
-                .andExpect(jsonPath("$.message").value("유저를 찾을 수 없습니다."));
-
-        assertThat(pinPlaceRepository.count()).isZero();
-    }
-
-    @DisplayName("유저가 이미 정지되었으면 장소를 저장하지 못하고, 404를 반환한다.")
-    @Test
-    void shouldReturn404_whenSuspendedUserTriesToSavePlaceToPlan() throws Exception {
-        //given
-        User user = getUser(UserStatus.SUSPENDED);
-        userRepository.save(user);
-
-        Plan plan = getPlan(false);
-        planRepository.save(plan);
-
-        PlanUsers planUsers = getPlanUsers(plan.getId(), user.getId(), PlanUserStatus.MEMBER);
-        planUsersRepository.save(planUsers);
-
-        SavePlaceRequest request = getSavePlaceRequest("경상북도 경주시 탑동 xxx", plan.getId());
-
-        String token = buildToken(user.getId(), "access", issuer, Instant.now().plusSeconds(10000));
-
-        //when, then
-        mockMvc.perform(
-                        post("/api/v1/places")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsBytes(request))
-                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.code").value("Not Found"))
-                .andExpect(jsonPath("$.message").value("유저를 찾을 수 없습니다."));
-
-        assertThat(pinPlaceRepository.count()).isZero();
-    }
-
-    @DisplayName("유저가 이미 차단되었으면 장소를 저장하지 못하고, 404를 반환한다.")
-    @Test
-    void shouldReturn404_whenBlockedUserTriesToSavePlaceToPlan() throws Exception {
-        //given
-        User user = getUser(UserStatus.BLOCKED);
-        userRepository.save(user);
-
-        Plan plan = getPlan(false);
-        planRepository.save(plan);
-
-        PlanUsers planUsers = getPlanUsers(plan.getId(), user.getId(), PlanUserStatus.MEMBER);
-        planUsersRepository.save(planUsers);
-
-        SavePlaceRequest request = getSavePlaceRequest("경상북도 경주시 탑동 xxx", plan.getId());
-
-        String token = buildToken(user.getId(), "access", issuer, Instant.now().plusSeconds(10000));
-
-        //when, then
-        mockMvc.perform(
-                        post("/api/v1/places")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsBytes(request))
-                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.code").value("Not Found"))
-                .andExpect(jsonPath("$.message").value("유저를 찾을 수 없습니다."));
-
-        assertThat(pinPlaceRepository.count()).isZero();
+    private static Stream<Arguments> provideInactiveUserStatuses() {
+        return Stream.of(
+                Arguments.of("탈퇴한 유저", UserStatus.WITHDRAWN),
+                Arguments.of("삭제된 유저", UserStatus.DELETED),
+                Arguments.of("정지당한 유저", UserStatus.SUSPENDED),
+                Arguments.of("차단된 유저", UserStatus.BLOCKED)
+        );
     }
 
     private SavePlaceRequest getSavePlaceRequest(String address, UUID planId) {
@@ -483,6 +302,5 @@ class PlaceControllerSavePlaceTest extends PlaceControllerTestSupport {
                 .lng(new BigDecimal("129.2108357"))
                 .build();
     }
-
 
 }
