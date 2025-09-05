@@ -62,7 +62,7 @@ public class CommonJwtUtil {
         }
 
         Claims claims = getClaims(accessToken);
-        return UUID.fromString(claims.get("userId", String.class));
+        return UUID.fromString(claims.get("id", String.class));
     }
 
     private boolean isValidAccessToken(String token) {

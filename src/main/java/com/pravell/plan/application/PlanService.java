@@ -1,7 +1,9 @@
 package com.pravell.plan.application;
 
+import com.pravell.plan.application.dto.PlanMemberDTO;
 import com.pravell.plan.domain.exception.PlanNotFoundException;
 import com.pravell.plan.domain.model.Plan;
+import com.pravell.plan.domain.model.PlanUserStatus;
 import com.pravell.plan.domain.model.PlanUsers;
 import com.pravell.plan.domain.repository.PlanRepository;
 import com.pravell.plan.domain.repository.PlanUsersRepository;
@@ -34,6 +36,31 @@ public class PlanService {
     @Transactional(readOnly = true)
     public List<PlanUsers> findPlanUsers(UUID planId) {
         return planUsersRepository.findAllByPlanId(planId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PlanMemberDTO> findPlanMembers(UUID planId) {
+        List<PlanUsers> planUsers = planUsersRepository.findAllByPlanId(planId);
+
+        return planUsers.stream().filter(pu -> pu.getPlanUserStatus().equals(PlanUserStatus.MEMBER) ||
+                        pu.getPlanUserStatus().equals(PlanUserStatus.OWNER) ||
+                        pu.getPlanUserStatus().equals(PlanUserStatus.BLOCKED))
+                .map(p -> {
+                    return PlanMemberDTO.builder()
+                            .memberId(p.getUserId())
+                            .planMemberStatus(p.getPlanUserStatus().name())
+                            .build();
+                }).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public boolean isPlanPublic(UUID planId){
+        Optional<Plan> plan = planRepository.findById(planId);
+        if (plan.isEmpty() || plan.get().getIsDeleted() == true) {
+            throw new PlanNotFoundException("플랜을 찾을 수 없습니다.");
+        }
+
+        return plan.get().getIsPublic();
     }
 
 }
