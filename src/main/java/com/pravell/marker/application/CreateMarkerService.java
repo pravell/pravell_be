@@ -10,10 +10,12 @@ import com.pravell.marker.domain.service.MarkerAuthorizationService;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class CreateMarkerService {
 
@@ -22,7 +24,9 @@ public class CreateMarkerService {
 
     @Transactional
     public CreateMarkerResponse create(UUID id, List<PlanMember> planMembers, CreateMarkerApplicationRequest request) {
-        validateCreateMarker(id, planMembers);
+        validateCreateMarker(id, planMembers, request.getPlanId());
+
+        log.info("유저 {}가 {} 플랜에 마커를 생성했습니다.", id, request.getPlanId());
 
         Marker saved = markerRepository.save(
                 Marker.createMarker(request.getDescription(), request.getColor(), request.getPlanId()));
@@ -30,8 +34,9 @@ public class CreateMarkerService {
         return buildCreateMarkerResponse(saved);
     }
 
-    private void validateCreateMarker(UUID id, List<PlanMember> planMembers) {
+    private void validateCreateMarker(UUID id, List<PlanMember> planMembers, UUID planId) {
         if (!markerAuthorizationService.isOwnerOrMember(id, planMembers)) {
+            log.info("유저 {}는 {} 플랜에 마커를 생성 할 권한이 없습니다.", id, planId);
             throw new AccessDeniedException("해당 마커를 생성 할 권한이 없습니다.");
         }
     }
