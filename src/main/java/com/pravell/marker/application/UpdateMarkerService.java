@@ -24,6 +24,10 @@ public class UpdateMarkerService {
     public MarkerResponse update(Marker marker, UUID userId, List<PlanMember> planMembers,
                                  UpdateMarkerApplicationRequest request) {
         validateUpdateMarker(marker, userId, planMembers);
+
+        log.info("유저 {}가 {} 플랜의 마커를 수정했습니다. before : {}, after : {}",
+                userId, marker.getPlanId(), marker.toString(), request.toString());
+
         updateMarker(marker, request);
         return buildMarkerResponse(marker);
     }

@@ -35,6 +35,16 @@ public class Marker extends AggregateRoot {
     @Column(nullable = false)
     private UUID planId;
 
+    @Override
+    public String toString() {
+        return "Marker{" +
+                "id=" + id +
+                ", description='" + description + '\'' +
+                ", color='" + color + '\'' +
+                ", planId=" + planId +
+                '}';
+    }
+
     public static Marker createMarker(String description, String color, UUID planId) {
         validateDescription(description);
         validateColor(color);
