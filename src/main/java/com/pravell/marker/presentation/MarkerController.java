@@ -1,0 +1,34 @@
+package com.pravell.marker.presentation;
+
+import com.pravell.common.util.CommonJwtUtil;
+import com.pravell.marker.application.MarkerFacade;
+import com.pravell.marker.application.dto.response.CreateMarkerResponse;
+import com.pravell.marker.presentation.request.CreateMarkerRequest;
+import jakarta.validation.Valid;
+import java.net.URI;
+import java.util.UUID;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/api/v1/markers")
+@RequiredArgsConstructor
+public class MarkerController {
+
+    private final CommonJwtUtil commonJwtUtil;
+    private final MarkerFacade markerFacade;
+
+    @PostMapping
+    public ResponseEntity<CreateMarkerResponse> createMarker(@RequestHeader("authorization") String header,
+                                                             @Valid @RequestBody CreateMarkerRequest createMarkerRequest) {
+        UUID id = commonJwtUtil.getUserIdFromToken(header);
+        CreateMarkerResponse response = markerFacade.createMarker(id, createMarkerRequest.toApplicationRequest());
+        return ResponseEntity.created(URI.create("/markers/" + response.getMarkerId())).body(response);
+    }
+
+}

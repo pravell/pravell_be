@@ -508,7 +508,7 @@ class PlaceControllerSavePlaceValidTest extends ControllerTestSupport {
                                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("Bad Request"))
-                .andExpect(jsonPath("$.message").value("pinColor: 올바르지 못한 pinColor입니다."));
+                .andExpect(jsonPath("$.message").value("pinColor: 올바르지 못한 pin color입니다."));
 
         assertThat(pinPlaceRepository.count()).isZero();
     }

@@ -44,7 +44,7 @@ public class SavePlaceRequest {
     private BigDecimal lng;
 
     @NotBlank(message = "pinColor는 생략이 불가능합니다.")
-    @Pattern(regexp = "^#([A-Fa-f0-9]{6})$", message = "올바르지 못한 pinColor입니다.")
+    @Pattern(regexp = "^#([A-Fa-f0-9]{6})$", message = "올바르지 못한 pin color입니다.")
     private String pinColor;
 
     @NotNull(message = "planId는 생략이 불가능합니다.")

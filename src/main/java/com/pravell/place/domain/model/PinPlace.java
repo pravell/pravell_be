@@ -1,5 +1,6 @@
 package com.pravell.place.domain.model;
 
+import com.pravell.common.domain.AggregateRoot;
 import com.pravell.place.application.dto.response.api.GooglePlaceDetailsResponse;
 import com.pravell.place.application.dto.response.api.NaverPlaceResponse;
 import jakarta.persistence.Column;
@@ -24,7 +25,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class PinPlace {
+public class PinPlace extends AggregateRoot {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
