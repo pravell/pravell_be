@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -52,4 +53,11 @@ public class MarkerController {
         return ResponseEntity.ok(markerFacade.updateMarker(id, markerId, updateMarkerRequest.toApplicationRequest()));
     }
 
+    @DeleteMapping("/{markerId}")
+    public ResponseEntity<Void> deleteMarker(@RequestHeader("authorization") String header,
+                                                       @PathVariable Long markerId) {
+        UUID id = commonJwtUtil.getUserIdFromToken(header);
+        markerFacade.deleteMarker(id, markerId);
+        return ResponseEntity.noContent().build();
+    }
 }

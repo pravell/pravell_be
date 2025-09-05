@@ -25,6 +25,7 @@ public class MarkerFacade {
     private final FindMarkerService findMarkerService;
     private final UpdateMarkerService updateMarkerService;
     private final MarkerService markerService;
+    private final DeleteMarkerService deleteMarkerService;
 
     public MarkerResponse createMarker(UUID id, CreateMarkerApplicationRequest request) {
         userService.findUserById(id);
@@ -54,6 +55,16 @@ public class MarkerFacade {
         return updateMarkerService.update(marker, id, planMembers, request);
     }
 
+    public void deleteMarker(UUID id, Long markerId) {
+        userService.findUserById(id);
+
+        Marker marker = markerService.findMarker(markerId);
+        planService.findPlan(marker.getPlanId());
+        List<PlanMember> planMembers = getPlanMembers(marker.getPlanId());
+
+        deleteMarkerService.delete(id, marker, planMembers);
+    }
+
     private List<PlanMember> getPlanMembers(UUID planId) {
         List<PlanMemberDTO> planMembers = planService.findPlanMembers(planId);
 
@@ -66,5 +77,4 @@ public class MarkerFacade {
                 }
         ).toList();
     }
-
 }
