@@ -89,6 +89,8 @@ public class PlanFacade {
                 .ownerId(ownerId)
                 .ownerNickname(ownerAndMembers.getFirst())
                 .member(ownerAndMembers.getSecond())
+                .startDate(plan.getStartDate())
+                .endDate(plan.getEndDate())
                 .build();
     }
 
