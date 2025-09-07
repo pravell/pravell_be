@@ -10,7 +10,6 @@ import com.pravell.plan.domain.model.Member;
 import com.pravell.plan.domain.model.Plan;
 import com.pravell.plan.domain.model.PlanUserStatus;
 import com.pravell.plan.domain.model.PlanUsers;
-import com.pravell.plan.presentation.request.UpdatePlanRequest;
 import com.pravell.user.application.UserService;
 import com.pravell.user.application.dto.UserMemberDTO;
 import java.util.ArrayList;
@@ -41,6 +40,8 @@ public class PlanFacade {
                 .createdAt(planCreatedEvent.getCreatedAt())
                 .isPublic(planCreatedEvent.getPlan().getIsPublic())
                 .name(planCreatedEvent.getPlan().getName())
+                .startDate(planCreatedEvent.getPlan().getStartDate())
+                .endDate(planCreatedEvent.getPlan().getEndDate())
                 .build();
     }
 
