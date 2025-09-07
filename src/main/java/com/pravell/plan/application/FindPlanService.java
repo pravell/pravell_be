@@ -2,11 +2,13 @@ package com.pravell.plan.application;
 
 import com.pravell.common.exception.AccessDeniedException;
 import com.pravell.plan.application.dto.response.FindPlansResponse;
+import com.pravell.plan.domain.model.Member;
 import com.pravell.plan.domain.model.Plan;
 import com.pravell.plan.domain.model.PlanUserStatus;
 import com.pravell.plan.domain.model.PlanUsers;
 import com.pravell.plan.domain.repository.PlanRepository;
 import com.pravell.plan.domain.repository.PlanUsersRepository;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -25,33 +27,41 @@ public class FindPlanService {
     private final PlanUsersRepository planUsersRepository;
 
     @Transactional(readOnly = true)
-    public List<FindPlansResponse> findAll(UUID userId) {
-        List<PlanUsers> planUsers = planUsersRepository.findAllByUserId(userId);
-
-        List<UUID> planIds = planUsers.stream()
-                .filter(p -> p.getPlanUserStatus().equals(PlanUserStatus.MEMBER) ||
-                        p.getPlanUserStatus().equals(PlanUserStatus.OWNER))
-                .map(PlanUsers::getPlanId)
-                .toList();
-
+    public List<FindPlansResponse> findAll(UUID userId, Map<UUID, List<Member>> planIdAndPlanMembers) {
+        List<UUID> planIds = new ArrayList<>(planIdAndPlanMembers.keySet());
         List<Plan> plans = planRepository.findAllByIdIn(planIds);
 
         Map<UUID, Plan> planMap = plans.stream()
                 .filter(p -> p.getIsDeleted().equals(false))
                 .collect(Collectors.toMap(Plan::getId, Function.identity()));
 
-        return planUsers.stream()
-                .map(pu -> {
-                    Plan plan = planMap.get(pu.getPlanId());
-                    if (plan == null) {
+        List<PlanUsers> planUsersList = planUsersRepository.findAllByUserId(userId);
+        Map<UUID, PlanUsers> planUserMap = planUsersList.stream()
+                .collect(Collectors.toMap(PlanUsers::getPlanId, Function.identity()));
+
+        return planIdAndPlanMembers.entrySet().stream()
+                .map(entry -> {
+                    UUID planId = entry.getKey();
+                    List<Member> members = entry.getValue();
+                    Plan plan = planMap.get(planId);
+                    PlanUsers planUser = planUserMap.get(planId);
+
+                    if (plan == null || planUser == null) {
                         return null;
                     }
+
                     return FindPlansResponse.builder()
                             .planId(plan.getId())
                             .planName(plan.getName())
-                            .isOwner(pu.getPlanUserStatus().equals(PlanUserStatus.OWNER))
+                            .isOwner(planUser.getPlanUserStatus().equals(PlanUserStatus.OWNER))
+                            .members(members.stream()
+                                    .map(Member::getNickname)
+                                    .toList())
+                            .startDate(plan.getStartDate())
+                            .endDate(plan.getEndDate())
                             .build();
-                }).filter(Objects::nonNull)
+                })
+                .filter(Objects::nonNull)
                 .toList();
     }
 

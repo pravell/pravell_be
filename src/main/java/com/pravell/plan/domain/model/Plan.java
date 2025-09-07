@@ -34,7 +34,10 @@ public class Plan extends AggregateRoot {
     @Column(nullable = false)
     private Boolean isDeleted;
 
+    @Column(nullable = false)
     private LocalDate startDate;
+
+    @Column(nullable = false)
     private LocalDate endDate;
 
     @Override

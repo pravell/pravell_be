@@ -1,5 +1,6 @@
 package com.pravell.plan.application;
 
+import com.pravell.plan.application.dto.PlanMemberDTO;
 import com.pravell.plan.application.dto.request.CreatePlanApplicationRequest;
 import com.pravell.plan.application.dto.request.UpdatePlanApplicationRequest;
 import com.pravell.plan.application.dto.response.CreatePlanResponse;
@@ -13,7 +14,9 @@ import com.pravell.plan.domain.model.PlanUsers;
 import com.pravell.user.application.UserService;
 import com.pravell.user.application.dto.UserMemberDTO;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.util.Pair;
@@ -47,7 +50,23 @@ public class PlanFacade {
 
     public List<FindPlansResponse> findAllPlans(UUID id) {
         userService.findUserById(id);
-        return findPlanService.findAll(id);
+
+        Map<UUID, List<Member>> planIdAndPlanMembers = new HashMap<>();
+
+        List<PlanUsers> memberOrOwnerPlanByUsers = planService.findMemberOrOwnerPlanByUsers(id);
+        for (PlanUsers planUser : memberOrOwnerPlanByUsers){
+            List<PlanMemberDTO> planMembers = planService.findPlanMembers(planUser.getPlanId());
+            List<UUID> memberIds= planMembers.stream()
+                    .filter(pm->!pm.getPlanMemberStatus().equals("BLOCKED"))
+                    .map(PlanMemberDTO::getMemberId)
+                    .toList();
+
+            List<Member> members = getMembers(memberIds);
+
+            planIdAndPlanMembers.put(planUser.getPlanId(), members);
+        }
+
+        return findPlanService.findAll(id, planIdAndPlanMembers);
     }
 
     public FindPlanResponse findPlan(UUID planId, UUID userId) {
@@ -83,6 +102,32 @@ public class PlanFacade {
         return userService.findMembers(memberIds);
     }
 
+    public void deletePlan(UUID planId, UUID userId) {
+        userService.findUserById(userId);
+
+        Plan plan = planService.findPlan(planId);
+        List<PlanUsers> planUsers = planService.findPlanUsers(planId);
+
+        deletePlanService.deletePlan(plan, userId, planUsers);
+    }
+
+    public CreatePlanResponse updatePlan(UUID planId, UUID userId, UpdatePlanApplicationRequest request) {
+        userService.findUserById(userId);
+
+        Plan plan = planService.findPlan(planId);
+        List<PlanUsers> planUsers = planService.findPlanUsers(planId);
+
+        updatePlanService.update(plan, userId, planUsers, request);
+
+        Plan afterPlan = planService.findPlan(planId);
+        return CreatePlanResponse.builder()
+                .planId(afterPlan.getId())
+                .name(afterPlan.getName())
+                .isPublic(afterPlan.getIsPublic())
+                .createdAt(afterPlan.getCreatedAt())
+                .build();
+    }
+
     private UUID extractOwnerId(List<PlanUsers> planUsers) {
         return planUsers.stream().filter(pu -> pu.getPlanUserStatus().equals(PlanUserStatus.OWNER))
                 .map(PlanUsers::getUserId)
@@ -108,30 +153,15 @@ public class PlanFacade {
         return Pair.of(ownerNickname, members);
     }
 
-    public void deletePlan(UUID planId, UUID userId) {
-        userService.findUserById(userId);
+    private List<Member> getMembers(List<UUID> memberId){
+        List<UserMemberDTO> userMembers = userService.findMembers(memberId);
 
-        Plan plan = planService.findPlan(planId);
-        List<PlanUsers> planUsers = planService.findPlanUsers(planId);
-
-        deletePlanService.deletePlan(plan, userId, planUsers);
-    }
-
-    public CreatePlanResponse updatePlan(UUID planId, UUID userId, UpdatePlanApplicationRequest request) {
-        userService.findUserById(userId);
-
-        Plan plan = planService.findPlan(planId);
-        List<PlanUsers> planUsers = planService.findPlanUsers(planId);
-
-        updatePlanService.update(plan, userId, planUsers, request);
-
-        Plan afterPlan = planService.findPlan(planId);
-        return CreatePlanResponse.builder()
-                .planId(afterPlan.getId())
-                .name(afterPlan.getName())
-                .isPublic(afterPlan.getIsPublic())
-                .createdAt(afterPlan.getCreatedAt())
-                .build();
+        return userMembers.stream().map(um->{
+            return Member.builder()
+                    .nickname(um.getNickname())
+                    .memberId(um.getMemberId())
+                    .build();
+        }).toList();
     }
 
 }

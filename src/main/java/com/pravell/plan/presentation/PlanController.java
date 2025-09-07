@@ -41,9 +41,8 @@ public class PlanController {
     }
 
     @GetMapping
-    public ResponseEntity<List<FindPlansResponse>> findPlans(
-            @RequestHeader("Authorization") String authorizationHeader) {
-        UUID id = commonJwtUtil.getUserIdFromToken(authorizationHeader);
+    public ResponseEntity<List<FindPlansResponse>> findPlans(@RequestHeader("Authorization") String header) {
+        UUID id = commonJwtUtil.getUserIdFromToken(header);
         return ResponseEntity.ok(planFacade.findAllPlans(id));
     }
 

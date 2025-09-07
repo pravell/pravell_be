@@ -7,12 +7,16 @@ import static org.assertj.core.groups.Tuple.tuple;
 
 import com.pravell.common.exception.AccessDeniedException;
 import com.pravell.plan.application.dto.response.FindPlansResponse;
+import com.pravell.plan.domain.model.Member;
 import com.pravell.plan.domain.model.Plan;
 import com.pravell.plan.domain.model.PlanUserStatus;
 import com.pravell.plan.domain.model.PlanUsers;
 import com.pravell.plan.domain.repository.PlanRepository;
 import com.pravell.plan.domain.repository.PlanUsersRepository;
+import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -71,8 +75,14 @@ class FindPlanServiceTest {
         planUsersRepository.saveAll(
                 List.of(planUsers1, planUsers2, planUsers3, planUsers4, planUsers5, planUsers6, planUsers7));
 
+        Map<UUID, List<Member>> planIdAndPlanMembers = new HashMap<>();
+
+        planIdAndPlanMembers.put(plan1.getId(), List.of(getMember("멤버 1"), getMember("멤버 2")));
+        planIdAndPlanMembers.put(plan2.getId(), List.of(getMember("멤버1")));
+        planIdAndPlanMembers.put(plan3.getId(), List.of(getMember("멤버4"), getMember("멤버5")));
+
         //when
-        List<FindPlansResponse> responses = findPlanService.findAll(userId);
+        List<FindPlansResponse> responses = findPlanService.findAll(userId, planIdAndPlanMembers);
 
         //then
         assertThat(responses).hasSize(3)
@@ -157,6 +167,8 @@ class FindPlanServiceTest {
                 .name(name)
                 .isPublic(isPublic)
                 .isDeleted(isDeleted)
+                .startDate(LocalDate.parse("2025-09-29"))
+                .endDate(LocalDate.parse("2025-09-30"))
                 .build();
     }
 
@@ -173,6 +185,8 @@ class FindPlanServiceTest {
                 .id(planId)
                 .name("테스트 여행")
                 .isDeleted(false)
+                .startDate(LocalDate.parse("2025-09-29"))
+                .endDate(LocalDate.parse("2025-09-30"))
                 .isPublic(isPublic)
                 .build();
     }
@@ -182,6 +196,13 @@ class FindPlanServiceTest {
                 .planId(planId)
                 .userId(userId)
                 .planUserStatus(status)
+                .build();
+    }
+
+    private Member getMember(String nickname) {
+        return Member.builder()
+                .memberId(UUID.randomUUID())
+                .nickname(nickname)
                 .build();
     }
 
