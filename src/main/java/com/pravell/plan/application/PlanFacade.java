@@ -121,12 +121,13 @@ public class PlanFacade {
 
         updatePlanService.update(plan, userId, planUsers, request);
 
-        Plan afterPlan = planService.findPlan(planId);
         return CreatePlanResponse.builder()
-                .planId(afterPlan.getId())
-                .name(afterPlan.getName())
-                .isPublic(afterPlan.getIsPublic())
-                .createdAt(afterPlan.getCreatedAt())
+                .planId(plan.getId())
+                .name(plan.getName())
+                .isPublic(plan.getIsPublic())
+                .createdAt(plan.getCreatedAt())
+                .startDate(plan.getStartDate())
+                .endDate(plan.getEndDate())
                 .build();
     }
 

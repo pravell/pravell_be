@@ -76,6 +76,22 @@ public class Plan extends AggregateRoot {
         this.name = name;
     }
 
+    public void updateStartDate(LocalDate startDate) {
+        validateDate(startDate, this.endDate);
+        this.startDate = startDate;
+    }
+
+    public void updateEndDate(LocalDate endDate) {
+        validateDate(this.startDate, endDate);
+        this.endDate = endDate;
+    }
+
+    public void updateDate(LocalDate startDate, LocalDate endDate) {
+        validateDate(startDate, endDate);
+        this.startDate = startDate;
+        this.endDate = endDate;
+    }
+
     private static void validateName(String name) {
         if (name == null || name.length() < 2 || name.length() > 20) {
             throw new IllegalArgumentException("플랜 이름은 2 ~ 20자 사이여야 합니다.");
@@ -87,5 +103,4 @@ public class Plan extends AggregateRoot {
             throw new IllegalArgumentException("종료 날짜가 시작 날짜보다 앞설 수 없습니다.");
         }
     }
-
 }

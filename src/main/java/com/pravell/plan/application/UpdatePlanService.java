@@ -31,6 +31,15 @@ public class UpdatePlanService {
         if (request.getName() != null) {
             plan.updateName(request.getName());
         }
+        if (request.getStartDate() != null && request.getEndDate() != null) {
+            plan.updateDate(request.getStartDate(), request.getEndDate());
+        }
+        if (request.getStartDate() != null) {
+            plan.updateStartDate(request.getStartDate());
+        }
+        if (request.getEndDate() != null) {
+            plan.updateEndDate(request.getEndDate());
+        }
     }
 
     private static void validateUpdatePermission(UUID userId, List<PlanUsers> planUsers) {
