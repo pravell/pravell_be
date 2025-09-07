@@ -7,7 +7,7 @@ import com.pravell.place.application.dto.request.SavePlaceApplicationRequest;
 import com.pravell.place.domain.model.PinPlace;
 import com.pravell.place.domain.model.PlanMember;
 import com.pravell.place.domain.repository.PinPlaceRepository;
-import com.pravell.place.domain.service.PlanAuthorizationService;
+import com.pravell.place.domain.service.PlaceAuthorizationService;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -24,7 +24,7 @@ public class SavePlaceService {
 
     private final PinPlaceRepository pinPlaceRepository;
     private final ObjectMapper objectMapper;
-    private final PlanAuthorizationService planAuthorizationService;
+    private final PlaceAuthorizationService placeAuthorizationService;
 
     @Transactional
     public Long save(UUID id, SavePlaceApplicationRequest request, List<PlanMember> planMembers) {
@@ -38,7 +38,7 @@ public class SavePlaceService {
     }
 
     private void validatePlaceSavePermission(UUID id, SavePlaceApplicationRequest request, List<PlanMember> planMembers) {
-        if (!planAuthorizationService.hasUpdatePermission(id, planMembers)){
+        if (!placeAuthorizationService.hasUpdatePermission(id, planMembers)){
             log.info("{} 유저는 {} 플랜에 장소를 저장 할 권한이 없습니다.", id, request.getPlanId());
             throw new AccessDeniedException("해당 플랜에 장소를 저장 할 권한이 없습니다.");
         }

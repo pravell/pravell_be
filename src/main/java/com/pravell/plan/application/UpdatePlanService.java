@@ -3,8 +3,8 @@ package com.pravell.plan.application;
 import com.pravell.common.exception.AccessDeniedException;
 import com.pravell.plan.application.dto.request.UpdatePlanApplicationRequest;
 import com.pravell.plan.domain.model.Plan;
-import com.pravell.plan.domain.model.PlanUserStatus;
 import com.pravell.plan.domain.model.PlanUsers;
+import com.pravell.plan.domain.service.PlanAuthorizationService;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @RequiredArgsConstructor
 public class UpdatePlanService {
+
+    private final PlanAuthorizationService planAuthorizationService;
 
     @Transactional
     public void update(Plan plan, UUID userId, List<PlanUsers> planUsers,
@@ -42,11 +44,8 @@ public class UpdatePlanService {
         }
     }
 
-    private static void validateUpdatePermission(UUID userId, List<PlanUsers> planUsers) {
-        boolean isOwner = planUsers.stream()
-                .anyMatch(pu -> pu.getUserId().equals(userId) && pu.getPlanUserStatus().equals(PlanUserStatus.OWNER));
-
-        if (!isOwner) {
+    private void validateUpdatePermission(UUID userId, List<PlanUsers> planUsers) {
+        if (!planAuthorizationService.isOwner(userId, planUsers)){
             throw new AccessDeniedException("해당 리소스를 수정 할 권한이 없습니다.");
         }
     }

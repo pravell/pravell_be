@@ -8,6 +8,7 @@ import com.pravell.plan.domain.model.PlanUserStatus;
 import com.pravell.plan.domain.model.PlanUsers;
 import com.pravell.plan.domain.repository.PlanRepository;
 import com.pravell.plan.domain.repository.PlanUsersRepository;
+import com.pravell.plan.domain.service.PlanAuthorizationService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -25,20 +26,32 @@ public class FindPlanService {
 
     private final PlanRepository planRepository;
     private final PlanUsersRepository planUsersRepository;
+    private final PlanAuthorizationService planAuthorizationService;
 
     @Transactional(readOnly = true)
     public List<FindPlansResponse> findAll(UUID userId, Map<UUID, List<Member>> planIdAndPlanMembers) {
         List<UUID> planIds = new ArrayList<>(planIdAndPlanMembers.keySet());
-        List<Plan> plans = planRepository.findAllByIdIn(planIds);
 
-        Map<UUID, Plan> planMap = plans.stream()
+        Map<UUID, Plan> planMap = findValidPlans(planIds);
+        Map<UUID, PlanUsers> planUserMap = findPlanUsersByUser(userId);
+
+        return buildFindPlansResponse(planIdAndPlanMembers, planMap, planUserMap);
+    }
+
+    private Map<UUID, Plan> findValidPlans(List<UUID> planIds) {
+        return planRepository.findAllByIdIn(planIds).stream()
                 .filter(p -> p.getIsDeleted().equals(false))
                 .collect(Collectors.toMap(Plan::getId, Function.identity()));
+    }
 
-        List<PlanUsers> planUsersList = planUsersRepository.findAllByUserId(userId);
-        Map<UUID, PlanUsers> planUserMap = planUsersList.stream()
+    private Map<UUID, PlanUsers> findPlanUsersByUser(UUID userId) {
+        return planUsersRepository.findAllByUserId(userId).stream()
                 .collect(Collectors.toMap(PlanUsers::getPlanId, Function.identity()));
+    }
 
+    private static List<FindPlansResponse> buildFindPlansResponse(Map<UUID, List<Member>> planIdAndPlanMembers,
+                                                                 Map<UUID, Plan> planMap,
+                                                                 Map<UUID, PlanUsers> planUserMap) {
         return planIdAndPlanMembers.entrySet().stream()
                 .map(entry -> {
                     UUID planId = entry.getKey();
@@ -66,22 +79,12 @@ public class FindPlanService {
     }
 
     public void validateMemberOrOwner(Plan plan, UUID userId, List<PlanUsers> planUsers) {
-        boolean isBlocked = planUsers.stream()
-                .anyMatch(p -> p.getUserId().equals(userId) && p.getPlanUserStatus().equals(PlanUserStatus.BLOCKED));
-
-        if (isBlocked) {
+        if (!planAuthorizationService.hasPublicPlanPermission(userId, planUsers)) {
             throw new AccessDeniedException("해당 리소스에 접근 할 권한이 없습니다.");
         }
 
         if (!plan.getIsPublic()) {
-            boolean isMemberOrOwner = planUsers.stream()
-                    .filter(p ->
-                            p.getPlanUserStatus().equals(PlanUserStatus.OWNER) ||
-                                    p.getPlanUserStatus().equals(PlanUserStatus.MEMBER))
-                    .map(PlanUsers::getUserId)
-                    .anyMatch(pu -> pu.equals(userId));
-
-            if (!isMemberOrOwner) {
+            if (!planAuthorizationService.isOwnerOrMember(userId, planUsers)) {
                 throw new AccessDeniedException("해당 리소스에 접근 할 권한이 없습니다.");
             }
         }

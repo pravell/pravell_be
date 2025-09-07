@@ -7,7 +7,7 @@ import java.util.UUID;
 import org.springframework.stereotype.Component;
 
 @Component
-public class PlanAuthorizationService {
+public class PlaceAuthorizationService {
 
     public boolean hasUpdatePermission(UUID userId, List<PlanMember> planMembers) {
         return planMembers.stream()

@@ -8,6 +8,7 @@ import com.pravell.plan.application.dto.request.UpdatePlanApplicationRequest;
 import com.pravell.plan.domain.model.Plan;
 import com.pravell.plan.domain.model.PlanUserStatus;
 import com.pravell.plan.domain.model.PlanUsers;
+import com.pravell.plan.domain.service.PlanAuthorizationService;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,7 +24,7 @@ class UpdatePlanServiceTest {
 
     @BeforeEach
     void setUp() {
-        updatePlanService = new UpdatePlanService();
+        updatePlanService = new UpdatePlanService(new PlanAuthorizationService());
         ownerId = UUID.randomUUID();
         memberId = UUID.randomUUID();
         plan = Plan.builder()

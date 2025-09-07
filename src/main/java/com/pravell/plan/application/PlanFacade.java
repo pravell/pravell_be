@@ -35,9 +35,11 @@ public class PlanFacade {
 
     public CreatePlanResponse createPlan(CreatePlanApplicationRequest request, UUID id) {
         userService.findUserById(id);
-
         PlanCreatedEvent planCreatedEvent = createPlanService.create(request, id);
+        return buildCreatePlanResponse(planCreatedEvent);
+    }
 
+    private static CreatePlanResponse buildCreatePlanResponse(PlanCreatedEvent planCreatedEvent) {
         return CreatePlanResponse.builder()
                 .planId(planCreatedEvent.getPlan().getId())
                 .createdAt(planCreatedEvent.getCreatedAt())
@@ -50,23 +52,32 @@ public class PlanFacade {
 
     public List<FindPlansResponse> findAllPlans(UUID id) {
         userService.findUserById(id);
+        Map<UUID, List<Member>> planIdAndPlanMembers = buildPlanIdToMembersMap(id);
+        return findPlanService.findAll(id, planIdAndPlanMembers);
+    }
 
-        Map<UUID, List<Member>> planIdAndPlanMembers = new HashMap<>();
+    private Map<UUID, List<Member>> buildPlanIdToMembersMap(UUID userId) {
+        List<PlanUsers> planUsers = planService.findMemberOrOwnerPlanByUsers(userId);
 
-        List<PlanUsers> memberOrOwnerPlanByUsers = planService.findMemberOrOwnerPlanByUsers(id);
-        for (PlanUsers planUser : memberOrOwnerPlanByUsers){
-            List<PlanMemberDTO> planMembers = planService.findPlanMembers(planUser.getPlanId());
-            List<UUID> memberIds= planMembers.stream()
-                    .filter(pm->!pm.getPlanMemberStatus().equals("BLOCKED"))
-                    .map(PlanMemberDTO::getMemberId)
-                    .toList();
+        Map<UUID, List<Member>> planIdToMembers = new HashMap<>();
 
-            List<Member> members = getMembers(memberIds);
+        for (PlanUsers planUser : planUsers) {
+            UUID planId = planUser.getPlanId();
 
-            planIdAndPlanMembers.put(planUser.getPlanId(), members);
+            List<UUID> activeMemberIds = getActiveMemberIds(planId);
+            List<Member> members = getMembers(activeMemberIds);
+
+            planIdToMembers.put(planId, members);
         }
 
-        return findPlanService.findAll(id, planIdAndPlanMembers);
+        return planIdToMembers;
+    }
+
+    private List<UUID> getActiveMemberIds(UUID planId) {
+        return planService.findPlanMembers(planId).stream()
+                .filter(pm -> !pm.getPlanMemberStatus().equals("BLOCKED"))
+                .map(PlanMemberDTO::getMemberId)
+                .toList();
     }
 
     public FindPlanResponse findPlan(UUID planId, UUID userId) {
@@ -81,6 +92,11 @@ public class PlanFacade {
         UUID ownerId = extractOwnerId(planUsers);
         Pair<String, List<Member>> ownerAndMembers = separateOwnerAndMembers(ownerId, userMembers);
 
+        return buildFindPlanResponse(plan, ownerId, ownerAndMembers);
+    }
+
+    private static FindPlanResponse buildFindPlanResponse(Plan plan, UUID ownerId,
+                                                        Pair<String, List<Member>> ownerAndMembers) {
         return FindPlanResponse.builder()
                 .planId(plan.getId())
                 .name(plan.getName())
@@ -120,7 +136,10 @@ public class PlanFacade {
         List<PlanUsers> planUsers = planService.findPlanUsers(planId);
 
         updatePlanService.update(plan, userId, planUsers, request);
+        return buildCreatePlanResponse(plan);
+    }
 
+    private static CreatePlanResponse buildCreatePlanResponse(Plan plan) {
         return CreatePlanResponse.builder()
                 .planId(plan.getId())
                 .name(plan.getName())
