@@ -1,6 +1,7 @@
 package com.pravell.place.application.dto.response;
 
 import java.math.BigDecimal;
+import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -16,5 +17,8 @@ public class FindPlanPlacesResponse {
     private BigDecimal lat;
     private BigDecimal lng;
     private String pinColor;
+    private String address;
+    private String roadAddress;
+    private List<String> hours;
 
 }

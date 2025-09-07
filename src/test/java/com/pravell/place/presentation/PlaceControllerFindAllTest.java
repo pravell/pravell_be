@@ -14,6 +14,7 @@ import com.pravell.plan.domain.model.PlanUsers;
 import com.pravell.user.domain.model.User;
 import com.pravell.user.domain.model.UserStatus;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -27,6 +28,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.util.StringUtils;
 
 class PlaceControllerFindAllTest extends PlaceControllerTestSupport {
 
@@ -54,12 +56,12 @@ class PlaceControllerFindAllTest extends PlaceControllerTestSupport {
         PlanUsers planUsers = getPlanUsers(plan.getId(), user.getId(), planUserStatus);
         planUsersRepository.save(planUsers);
 
-        PinPlace pinPlace1 = getPinPlace(plan.getId());
-        PinPlace pinPlace2 = getPinPlace(plan.getId());
-        PinPlace pinPlace3 = getPinPlace(plan.getId());
+        PinPlace pinPlace1 = getPinPlace("add1", plan.getId());
+        PinPlace pinPlace2 = getPinPlace("add2", plan.getId());
+        PinPlace pinPlace3 = getPinPlace("add3", plan.getId());
 
-        PinPlace pinPlace4 = getPinPlace(plan2.getId());
-        PinPlace pinPlace5 = getPinPlace(plan2.getId());
+        PinPlace pinPlace4 = getPinPlace("add4", plan2.getId());
+        PinPlace pinPlace5 = getPinPlace("add5", plan2.getId());
         pinPlaceRepository.saveAll(List.of(pinPlace1, pinPlace2, pinPlace3, pinPlace4, pinPlace5));
 
         String token = buildToken(user.getId(), "access", issuer, Instant.now().plusSeconds(10000));
@@ -78,11 +80,16 @@ class PlaceControllerFindAllTest extends PlaceControllerTestSupport {
 
         //then
         assertThat(responseList).hasSize(3)
-                .extracting("title", "mapx", "mapy", "pinColor")
+                .extracting("title", "mapx", "mapy", "pinColor", "address", "roadAddress", "hours")
                 .containsExactlyInAnyOrder(
-                        tuple(pinPlace1.getTitle(), pinPlace1.getMapx(), pinPlace1.getMapy(), pinPlace1.getPinColor()),
-                        tuple(pinPlace2.getTitle(), pinPlace2.getMapx(), pinPlace2.getMapy(), pinPlace2.getPinColor()),
-                        tuple(pinPlace3.getTitle(), pinPlace3.getMapx(), pinPlace3.getMapy(), pinPlace3.getPinColor())
+                        tuple(pinPlace1.getTitle(), pinPlace1.getMapx(), pinPlace1.getMapy(), pinPlace1.getPinColor(),
+                                pinPlace1.getAddress(), pinPlace1.getRoadAddress(), parseHours(pinPlace1.getHours())),
+
+                        tuple(pinPlace2.getTitle(), pinPlace2.getMapx(), pinPlace2.getMapy(), pinPlace2.getPinColor(),
+                                pinPlace2.getAddress(), pinPlace2.getRoadAddress(), parseHours(pinPlace2.getHours())),
+
+                        tuple(pinPlace3.getTitle(), pinPlace3.getMapx(), pinPlace3.getMapy(), pinPlace3.getPinColor(),
+                                pinPlace3.getAddress(), pinPlace3.getRoadAddress(), parseHours(pinPlace3.getHours()))
                 );
     }
 
@@ -181,11 +188,16 @@ class PlaceControllerFindAllTest extends PlaceControllerTestSupport {
 
         //then
         assertThat(responseList).hasSize(3)
-                .extracting("title", "mapx", "mapy", "pinColor")
+                .extracting("title", "mapx", "mapy", "pinColor", "address", "roadAddress", "hours")
                 .containsExactlyInAnyOrder(
-                        tuple(pinPlace1.getTitle(), pinPlace1.getMapx(), pinPlace1.getMapy(), pinPlace1.getPinColor()),
-                        tuple(pinPlace2.getTitle(), pinPlace2.getMapx(), pinPlace2.getMapy(), pinPlace2.getPinColor()),
-                        tuple(pinPlace3.getTitle(), pinPlace3.getMapx(), pinPlace3.getMapy(), pinPlace3.getPinColor())
+                        tuple(pinPlace1.getTitle(), pinPlace1.getMapx(), pinPlace1.getMapy(), pinPlace1.getPinColor(),
+                                pinPlace1.getAddress(), pinPlace1.getRoadAddress(), parseHours(pinPlace1.getHours())),
+
+                        tuple(pinPlace2.getTitle(), pinPlace2.getMapx(), pinPlace2.getMapy(), pinPlace2.getPinColor(),
+                                pinPlace2.getAddress(), pinPlace2.getRoadAddress(), parseHours(pinPlace2.getHours())),
+
+                        tuple(pinPlace3.getTitle(), pinPlace3.getMapx(), pinPlace3.getMapy(), pinPlace3.getPinColor(),
+                                pinPlace3.getAddress(), pinPlace3.getRoadAddress(), parseHours(pinPlace3.getHours()))
                 );
     }
 
@@ -337,6 +349,19 @@ class PlaceControllerFindAllTest extends PlaceControllerTestSupport {
                 Arguments.of("정지된 유저", UserStatus.SUSPENDED),
                 Arguments.of("차단된 유저", UserStatus.BLOCKED)
         );
+    }
+
+    private List<String> parseHours(String hours) throws Exception {
+        List<String> hoursList = new ArrayList<>();
+
+        if (StringUtils.hasText(hours) && !hours.equals("정보 없음")) {
+            hoursList = objectMapper.readValue(hours, new TypeReference<>() {
+            });
+        } else {
+            hoursList.add("정보 없음");
+        }
+
+        return hoursList;
     }
 
 }
