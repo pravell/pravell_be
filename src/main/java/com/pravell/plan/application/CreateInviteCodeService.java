@@ -3,9 +3,9 @@ package com.pravell.plan.application;
 import com.pravell.common.exception.AccessDeniedException;
 import com.pravell.plan.domain.model.Plan;
 import com.pravell.plan.domain.model.PlanInviteCode;
-import com.pravell.plan.domain.model.PlanUserStatus;
 import com.pravell.plan.domain.model.PlanUsers;
 import com.pravell.plan.domain.repository.PlanInviteCodeRepository;
+import com.pravell.plan.domain.service.PlanAuthorizationService;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class CreateInviteCodeService {
 
     private final PlanInviteCodeRepository planInviteCodeRepository;
+    private final PlanAuthorizationService planAuthorizationService;
 
     @Value("${invite-code.characters}")
     private String CHARACTERS;
@@ -49,11 +50,7 @@ public class CreateInviteCodeService {
     }
 
     private void validateMemberOrOwnerForInviteCode(List<PlanUsers> planUsers, UUID userId) {
-        boolean isMember = planUsers.stream().anyMatch(pu -> pu.getUserId().equals(userId) &&
-                (pu.getPlanUserStatus().equals(PlanUserStatus.OWNER) || pu.getPlanUserStatus()
-                        .equals(PlanUserStatus.MEMBER)));
-
-        if (!isMember){
+        if (!planAuthorizationService.isOwnerOrMember(userId, planUsers)){
             throw new AccessDeniedException("해당 플랜의 초대코드를 생성 할 권한이 없습니다.");
         }
     }

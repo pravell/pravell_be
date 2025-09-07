@@ -12,6 +12,7 @@ import com.pravell.user.domain.model.User;
 import com.pravell.user.domain.model.UserStatus;
 import com.pravell.user.domain.repository.UserRepository;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +51,8 @@ public abstract class PlaceControllerTestSupport extends ControllerTestSupport {
                 .name("name")
                 .isDeleted(isDeleted)
                 .isPublic(isPublic)
+                .startDate(LocalDate.parse("2025-09-29"))
+                .endDate(LocalDate.parse("2025-09-30"))
                 .build();
     }
 

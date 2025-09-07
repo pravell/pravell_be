@@ -17,6 +17,7 @@ import com.pravell.user.domain.model.User;
 import com.pravell.user.domain.model.UserStatus;
 import com.pravell.user.domain.repository.UserRepository;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -130,6 +131,8 @@ class PlanControllerFindTest extends ControllerTestSupport {
                 .andExpect(jsonPath("$.isPublic").value("true"))
                 .andExpect(jsonPath("$.ownerId").value(owner.getId().toString()))
                 .andExpect(jsonPath("$.ownerNickname").value(owner.getNickname()))
+                .andExpect(jsonPath("$.startDate").value(LocalDate.parse("2025-09-29").toString()))
+                .andExpect(jsonPath("$.endDate").value(LocalDate.parse("2025-09-30").toString()))
                 .andReturn();
 
         String content = mvcResult.getResponse().getContentAsString();
@@ -166,6 +169,8 @@ class PlanControllerFindTest extends ControllerTestSupport {
                 .andExpect(jsonPath("$.isPublic").value("true"))
                 .andExpect(jsonPath("$.ownerId").value(owner.getId().toString()))
                 .andExpect(jsonPath("$.ownerNickname").value(owner.getNickname()))
+                .andExpect(jsonPath("$.startDate").value(LocalDate.parse("2025-09-29").toString()))
+                .andExpect(jsonPath("$.endDate").value(LocalDate.parse("2025-09-30").toString()))
                 .andReturn();
 
         String content = mvcResult.getResponse().getContentAsString();
@@ -362,6 +367,8 @@ class PlanControllerFindTest extends ControllerTestSupport {
                 .andExpect(jsonPath("$.isPublic").value("true"))
                 .andExpect(jsonPath("$.ownerId").value(owner.getId().toString()))
                 .andExpect(jsonPath("$.ownerNickname").value(owner.getNickname()))
+                .andExpect(jsonPath("$.startDate").value(LocalDate.parse("2025-09-29").toString()))
+                .andExpect(jsonPath("$.endDate").value(LocalDate.parse("2025-09-30").toString()))
                 .andReturn();
 
         String content = mvcResult.getResponse().getContentAsString();
@@ -398,6 +405,8 @@ class PlanControllerFindTest extends ControllerTestSupport {
                 .andExpect(jsonPath("$.isPublic").value("true"))
                 .andExpect(jsonPath("$.ownerId").value(owner.getId().toString()))
                 .andExpect(jsonPath("$.ownerNickname").value(owner.getNickname()))
+                .andExpect(jsonPath("$.startDate").value(LocalDate.parse("2025-09-29").toString()))
+                .andExpect(jsonPath("$.endDate").value(LocalDate.parse("2025-09-30").toString()))
                 .andReturn();
 
         String content = mvcResult.getResponse().getContentAsString();
@@ -536,6 +545,8 @@ class PlanControllerFindTest extends ControllerTestSupport {
                         .name(name)
                         .isPublic(isPublic)
                         .isDeleted(isDeleted)
+                        .startDate(LocalDate.parse("2025-09-29"))
+                        .endDate(LocalDate.parse("2025-09-30"))
                         .build()
         );
 

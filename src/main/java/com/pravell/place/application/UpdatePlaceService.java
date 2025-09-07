@@ -7,7 +7,7 @@ import com.pravell.place.application.dto.request.UpdatePlaceApplicationRequest;
 import com.pravell.place.application.dto.response.PlaceResponse;
 import com.pravell.place.domain.model.PinPlace;
 import com.pravell.place.domain.model.PlanMember;
-import com.pravell.place.domain.service.PlanAuthorizationService;
+import com.pravell.place.domain.service.PlaceAuthorizationService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -24,7 +24,7 @@ import org.springframework.util.StringUtils;
 public class UpdatePlaceService {
 
     private final ObjectMapper objectMapper;
-    private final PlanAuthorizationService planAuthorizationService;
+    private final PlaceAuthorizationService placeAuthorizationService;
 
     @Transactional
     public PlaceResponse update(PinPlace place, List<PlanMember> planMembers, UpdatePlaceApplicationRequest request,
@@ -39,7 +39,7 @@ public class UpdatePlaceService {
     }
 
     private void validateUpdatePermission(PinPlace place, List<PlanMember> planMembers, UUID id) {
-        if (!planAuthorizationService.hasUpdatePermission(id, planMembers)){
+        if (!placeAuthorizationService.hasUpdatePermission(id, planMembers)){
             log.info("{} 유저는 {} 플랜을 수정 할 권한이 없습니다.", id, place.getPlanId());
             throw new AccessDeniedException("해당 장소를 수정 할 권한이 없습니다.");
         }

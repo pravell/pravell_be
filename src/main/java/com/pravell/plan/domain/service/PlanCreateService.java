@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 public class PlanCreateService {
 
     public PlanCreatedEvent create(CreatePlanApplicationRequest request, UUID id){
-        Plan plan = Plan.create(request.getName(), request.getIsPublic());
+        Plan plan = Plan.create(request.getName(), request.getIsPublic(), request.getStartDate(), request.getEndDate());
         PlanUsers planUsers = PlanUsers.createOwnerForPlan(id, plan.getId());
 
         return new PlanCreatedEvent(plan, planUsers, LocalDateTime.now());

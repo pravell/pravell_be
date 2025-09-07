@@ -16,6 +16,7 @@ import com.pravell.user.domain.model.User;
 import com.pravell.user.domain.model.UserStatus;
 import com.pravell.user.domain.repository.UserRepository;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -522,6 +523,8 @@ class PlanMemberControllerWithdrawTest extends ControllerTestSupport {
                 .name("경주여행")
                 .isPublic(true)
                 .isDeleted(isDeleted)
+                .startDate(LocalDate.parse("2025-09-29"))
+                .endDate(LocalDate.parse("2025-09-30"))
                 .build();
     }
 

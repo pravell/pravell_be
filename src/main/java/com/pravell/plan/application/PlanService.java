@@ -54,13 +54,23 @@ public class PlanService {
     }
 
     @Transactional(readOnly = true)
-    public boolean isPlanPublic(UUID planId){
+    public boolean isPlanPublic(UUID planId) {
         Optional<Plan> plan = planRepository.findById(planId);
         if (plan.isEmpty() || plan.get().getIsDeleted() == true) {
             throw new PlanNotFoundException("플랜을 찾을 수 없습니다.");
         }
 
         return plan.get().getIsPublic();
+    }
+
+    @Transactional(readOnly = true)
+    public List<PlanUsers> findMemberOrOwnerPlanByUsers(UUID id) {
+        List<PlanUsers> planUsers = planUsersRepository.findAllByUserId(id);
+
+        return planUsers.stream()
+                .filter(pu -> pu.getPlanUserStatus().equals(PlanUserStatus.MEMBER) ||
+                        pu.getPlanUserStatus().equals(PlanUserStatus.OWNER))
+                .toList();
     }
 
 }

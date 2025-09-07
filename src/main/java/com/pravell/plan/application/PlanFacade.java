@@ -1,5 +1,6 @@
 package com.pravell.plan.application;
 
+import com.pravell.plan.application.dto.PlanMemberDTO;
 import com.pravell.plan.application.dto.request.CreatePlanApplicationRequest;
 import com.pravell.plan.application.dto.request.UpdatePlanApplicationRequest;
 import com.pravell.plan.application.dto.response.CreatePlanResponse;
@@ -10,11 +11,12 @@ import com.pravell.plan.domain.model.Member;
 import com.pravell.plan.domain.model.Plan;
 import com.pravell.plan.domain.model.PlanUserStatus;
 import com.pravell.plan.domain.model.PlanUsers;
-import com.pravell.plan.presentation.request.UpdatePlanRequest;
 import com.pravell.user.application.UserService;
 import com.pravell.user.application.dto.UserMemberDTO;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.util.Pair;
@@ -33,20 +35,49 @@ public class PlanFacade {
 
     public CreatePlanResponse createPlan(CreatePlanApplicationRequest request, UUID id) {
         userService.findUserById(id);
-
         PlanCreatedEvent planCreatedEvent = createPlanService.create(request, id);
+        return buildCreatePlanResponse(planCreatedEvent);
+    }
 
+    private static CreatePlanResponse buildCreatePlanResponse(PlanCreatedEvent planCreatedEvent) {
         return CreatePlanResponse.builder()
                 .planId(planCreatedEvent.getPlan().getId())
                 .createdAt(planCreatedEvent.getCreatedAt())
                 .isPublic(planCreatedEvent.getPlan().getIsPublic())
                 .name(planCreatedEvent.getPlan().getName())
+                .startDate(planCreatedEvent.getPlan().getStartDate())
+                .endDate(planCreatedEvent.getPlan().getEndDate())
                 .build();
     }
 
     public List<FindPlansResponse> findAllPlans(UUID id) {
         userService.findUserById(id);
-        return findPlanService.findAll(id);
+        Map<UUID, List<Member>> planIdAndPlanMembers = buildPlanIdToMembersMap(id);
+        return findPlanService.findAll(id, planIdAndPlanMembers);
+    }
+
+    private Map<UUID, List<Member>> buildPlanIdToMembersMap(UUID userId) {
+        List<PlanUsers> planUsers = planService.findMemberOrOwnerPlanByUsers(userId);
+
+        Map<UUID, List<Member>> planIdToMembers = new HashMap<>();
+
+        for (PlanUsers planUser : planUsers) {
+            UUID planId = planUser.getPlanId();
+
+            List<UUID> activeMemberIds = getActiveMemberIds(planId);
+            List<Member> members = getMembers(activeMemberIds);
+
+            planIdToMembers.put(planId, members);
+        }
+
+        return planIdToMembers;
+    }
+
+    private List<UUID> getActiveMemberIds(UUID planId) {
+        return planService.findPlanMembers(planId).stream()
+                .filter(pm -> !pm.getPlanMemberStatus().equals("BLOCKED"))
+                .map(PlanMemberDTO::getMemberId)
+                .toList();
     }
 
     public FindPlanResponse findPlan(UUID planId, UUID userId) {
@@ -61,6 +92,11 @@ public class PlanFacade {
         UUID ownerId = extractOwnerId(planUsers);
         Pair<String, List<Member>> ownerAndMembers = separateOwnerAndMembers(ownerId, userMembers);
 
+        return buildFindPlanResponse(plan, ownerId, ownerAndMembers);
+    }
+
+    private static FindPlanResponse buildFindPlanResponse(Plan plan, UUID ownerId,
+                                                        Pair<String, List<Member>> ownerAndMembers) {
         return FindPlanResponse.builder()
                 .planId(plan.getId())
                 .name(plan.getName())
@@ -69,6 +105,8 @@ public class PlanFacade {
                 .ownerId(ownerId)
                 .ownerNickname(ownerAndMembers.getFirst())
                 .member(ownerAndMembers.getSecond())
+                .startDate(plan.getStartDate())
+                .endDate(plan.getEndDate())
                 .build();
     }
 
@@ -80,6 +118,36 @@ public class PlanFacade {
                 .toList();
 
         return userService.findMembers(memberIds);
+    }
+
+    public void deletePlan(UUID planId, UUID userId) {
+        userService.findUserById(userId);
+
+        Plan plan = planService.findPlan(planId);
+        List<PlanUsers> planUsers = planService.findPlanUsers(planId);
+
+        deletePlanService.deletePlan(plan, userId, planUsers);
+    }
+
+    public CreatePlanResponse updatePlan(UUID planId, UUID userId, UpdatePlanApplicationRequest request) {
+        userService.findUserById(userId);
+
+        Plan plan = planService.findPlan(planId);
+        List<PlanUsers> planUsers = planService.findPlanUsers(planId);
+
+        updatePlanService.update(plan, userId, planUsers, request);
+        return buildCreatePlanResponse(plan);
+    }
+
+    private static CreatePlanResponse buildCreatePlanResponse(Plan plan) {
+        return CreatePlanResponse.builder()
+                .planId(plan.getId())
+                .name(plan.getName())
+                .isPublic(plan.getIsPublic())
+                .createdAt(plan.getCreatedAt())
+                .startDate(plan.getStartDate())
+                .endDate(plan.getEndDate())
+                .build();
     }
 
     private UUID extractOwnerId(List<PlanUsers> planUsers) {
@@ -107,30 +175,15 @@ public class PlanFacade {
         return Pair.of(ownerNickname, members);
     }
 
-    public void deletePlan(UUID planId, UUID userId) {
-        userService.findUserById(userId);
+    private List<Member> getMembers(List<UUID> memberId){
+        List<UserMemberDTO> userMembers = userService.findMembers(memberId);
 
-        Plan plan = planService.findPlan(planId);
-        List<PlanUsers> planUsers = planService.findPlanUsers(planId);
-
-        deletePlanService.deletePlan(plan, userId, planUsers);
-    }
-
-    public CreatePlanResponse updatePlan(UUID planId, UUID userId, UpdatePlanApplicationRequest request) {
-        userService.findUserById(userId);
-
-        Plan plan = planService.findPlan(planId);
-        List<PlanUsers> planUsers = planService.findPlanUsers(planId);
-
-        updatePlanService.update(plan, userId, planUsers, request);
-
-        Plan afterPlan = planService.findPlan(planId);
-        return CreatePlanResponse.builder()
-                .planId(afterPlan.getId())
-                .name(afterPlan.getName())
-                .isPublic(afterPlan.getIsPublic())
-                .createdAt(afterPlan.getCreatedAt())
-                .build();
+        return userMembers.stream().map(um->{
+            return Member.builder()
+                    .nickname(um.getNickname())
+                    .memberId(um.getMemberId())
+                    .build();
+        }).toList();
     }
 
 }

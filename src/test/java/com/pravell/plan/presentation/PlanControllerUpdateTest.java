@@ -16,6 +16,7 @@ import com.pravell.user.domain.model.User;
 import com.pravell.user.domain.model.UserStatus;
 import com.pravell.user.domain.repository.UserRepository;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -69,6 +70,8 @@ class PlanControllerUpdateTest extends ControllerTestSupport {
             .name("경주 여행")
             .isDeleted(false)
             .isPublic(true)
+            .startDate(LocalDate.parse("2025-09-29"))
+            .endDate(LocalDate.parse("2025-09-30"))
             .build();
 
 
@@ -90,6 +93,8 @@ class PlanControllerUpdateTest extends ControllerTestSupport {
             .name("경주 여행")
             .isDeleted(false)
             .isPublic(false)
+            .startDate(LocalDate.parse("2025-09-29"))
+            .endDate(LocalDate.parse("2025-09-30"))
             .build();
 
 
@@ -153,6 +158,173 @@ class PlanControllerUpdateTest extends ControllerTestSupport {
         assertThat(afterPlan.get().getName()).isNotEqualTo(publicPlan.getName());
         assertThat(afterPlan.get().getName()).isEqualTo(request.getName());
     }
+
+    @DisplayName("해당 플랜의 OWNER일 경우, 여행 시작 날짜 업데이트에 성공한다.")
+    @Test
+    void shouldUpdateStartDateSuccessfully_whenUserIsOwner() throws Exception {
+        //given
+        UpdatePlanRequest request = UpdatePlanRequest.builder()
+                .startDate(LocalDate.parse("2025-01-01"))
+                .build();
+
+        String token = buildToken(owner.getId(), "access", issuer, Instant.now().plusSeconds(10000));
+
+        Optional<Plan> beforePlan = planRepository.findById(publicPlan.getId());
+        assertThat(beforePlan).isPresent();
+        assertThat(beforePlan.get().getName()).isEqualTo(publicPlan.getName());
+        assertThat(beforePlan.get().getName()).isNotEqualTo(request.getName());
+
+        //when, then
+        mockMvc.perform(
+                        patch("/api/v1/plans/" + publicPlan.getId())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.planId").value(publicPlan.getId().toString()))
+                .andExpect(jsonPath("$.name").value(publicPlan.getName()))
+                .andExpect(jsonPath("$.isPublic").value(publicPlan.getIsPublic()))
+                .andExpect(jsonPath("$.startDate").value(request.getStartDate().toString()))
+                .andExpect(jsonPath("$.endDate").value(publicPlan.getEndDate().toString()))
+                .andExpect(jsonPath("$.createdAt").isNotEmpty());
+
+        Optional<Plan> afterPlan = planRepository.findById(publicPlan.getId());
+        assertThat(afterPlan).isPresent();
+        assertThat(afterPlan.get().getStartDate()).isNotEqualTo(publicPlan.getStartDate());
+        assertThat(afterPlan.get().getStartDate()).isEqualTo(request.getStartDate());
+    }
+
+    @DisplayName("해당 플랜의 OWNER일 경우, 여행 종료 날짜 업데이트에 성공한다.")
+    @Test
+    void shouldUpdateEndDateSuccessfully_whenUserIsOwner() throws Exception {
+        //given
+        UpdatePlanRequest request = UpdatePlanRequest.builder()
+                .endDate(LocalDate.parse("2025-12-10"))
+                .build();
+
+        String token = buildToken(owner.getId(), "access", issuer, Instant.now().plusSeconds(10000));
+
+        Optional<Plan> beforePlan = planRepository.findById(publicPlan.getId());
+        assertThat(beforePlan).isPresent();
+        assertThat(beforePlan.get().getName()).isEqualTo(publicPlan.getName());
+        assertThat(beforePlan.get().getName()).isNotEqualTo(request.getName());
+
+        //when, then
+        mockMvc.perform(
+                        patch("/api/v1/plans/" + publicPlan.getId())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.planId").value(publicPlan.getId().toString()))
+                .andExpect(jsonPath("$.name").value(publicPlan.getName()))
+                .andExpect(jsonPath("$.isPublic").value(publicPlan.getIsPublic()))
+                .andExpect(jsonPath("$.startDate").value(publicPlan.getStartDate().toString()))
+                .andExpect(jsonPath("$.endDate").value(request.getEndDate().toString()))
+                .andExpect(jsonPath("$.createdAt").isNotEmpty());
+
+        Optional<Plan> afterPlan = planRepository.findById(publicPlan.getId());
+        assertThat(afterPlan).isPresent();
+        assertThat(afterPlan.get().getEndDate()).isNotEqualTo(publicPlan.getEndDate());
+        assertThat(afterPlan.get().getEndDate()).isEqualTo(request.getEndDate());
+    }
+
+    @DisplayName("해당 플랜의 OWNER고 여행 종료 날짜가 시작 날짜보다 앞서도록 변경하면 변경에 실패하고 400을 반환한다.")
+    @Test
+    void shouldReturn400_whenOwnerUpdatesPlanWithInvalidDateRange() throws Exception {
+        //given
+        UpdatePlanRequest request = UpdatePlanRequest.builder()
+                .startDate(LocalDate.parse("2025-01-01"))
+                .endDate(LocalDate.parse("2024-01-01"))
+                .build();
+
+        String token = buildToken(owner.getId(), "access", issuer, Instant.now().plusSeconds(10000));
+
+        Optional<Plan> beforePlan = planRepository.findById(publicPlan.getId());
+        assertThat(beforePlan).isPresent();
+        assertThat(beforePlan.get().getName()).isEqualTo(publicPlan.getName());
+        assertThat(beforePlan.get().getName()).isNotEqualTo(request.getName());
+
+        //when, then
+        mockMvc.perform(
+                        patch("/api/v1/plans/" + publicPlan.getId())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("Bad Request"))
+                .andExpect(jsonPath("$.message").value("종료 날짜가 시작 날짜보다 앞설 수 없습니다."));
+
+        Optional<Plan> afterPlan = planRepository.findById(publicPlan.getId());
+        assertThat(afterPlan).isPresent();
+        assertThat(afterPlan.get().getStartDate()).isEqualTo(publicPlan.getStartDate());
+        assertThat(afterPlan.get().getStartDate()).isNotEqualTo(request.getStartDate());
+        assertThat(afterPlan.get().getEndDate()).isEqualTo(publicPlan.getEndDate());
+        assertThat(afterPlan.get().getEndDate()).isNotEqualTo(request.getEndDate());
+    }
+
+    @DisplayName("해당 플랜의 OWNER고 여행 종료 날짜가 시작 날짜보다 앞서도록 변경하면 변경에 실패하고 400을 반환한다.")
+    @Test
+    void shouldReturn400_whenOwnerUpdatesPlanWithInvalidDateRange2() throws Exception {
+        //given
+        UpdatePlanRequest request = UpdatePlanRequest.builder()
+                .startDate(LocalDate.parse("2026-01-01"))
+                .build();
+
+        String token = buildToken(owner.getId(), "access", issuer, Instant.now().plusSeconds(10000));
+
+        Optional<Plan> beforePlan = planRepository.findById(publicPlan.getId());
+        assertThat(beforePlan).isPresent();
+        assertThat(beforePlan.get().getName()).isEqualTo(publicPlan.getName());
+        assertThat(beforePlan.get().getName()).isNotEqualTo(request.getName());
+
+        //when, then
+        mockMvc.perform(
+                        patch("/api/v1/plans/" + publicPlan.getId())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("Bad Request"))
+                .andExpect(jsonPath("$.message").value("종료 날짜가 시작 날짜보다 앞설 수 없습니다."));
+
+        Optional<Plan> afterPlan = planRepository.findById(publicPlan.getId());
+        assertThat(afterPlan).isPresent();
+        assertThat(afterPlan.get().getStartDate()).isEqualTo(publicPlan.getStartDate());
+        assertThat(afterPlan.get().getStartDate()).isNotEqualTo(request.getStartDate());
+    }
+
+    @DisplayName("해당 플랜의 OWNER고 여행 종료 날짜가 시작 날짜보다 앞서도록 변경하면 변경에 실패하고 400을 반환한다.")
+    @Test
+    void shouldReturn400_whenOwnerUpdatesPlanWithInvalidDateRange3() throws Exception {
+        //given
+        UpdatePlanRequest request = UpdatePlanRequest.builder()
+                .endDate(LocalDate.parse("2023-01-01"))
+                .build();
+
+        String token = buildToken(owner.getId(), "access", issuer, Instant.now().plusSeconds(10000));
+
+        Optional<Plan> beforePlan = planRepository.findById(publicPlan.getId());
+        assertThat(beforePlan).isPresent();
+        assertThat(beforePlan.get().getName()).isEqualTo(publicPlan.getName());
+        assertThat(beforePlan.get().getName()).isNotEqualTo(request.getName());
+
+        //when, then
+        mockMvc.perform(
+                        patch("/api/v1/plans/" + publicPlan.getId())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("Bad Request"))
+                .andExpect(jsonPath("$.message").value("종료 날짜가 시작 날짜보다 앞설 수 없습니다."));
+
+        Optional<Plan> afterPlan = planRepository.findById(publicPlan.getId());
+        assertThat(afterPlan).isPresent();
+        assertThat(afterPlan.get().getEndDate()).isEqualTo(publicPlan.getEndDate());
+        assertThat(afterPlan.get().getEndDate()).isNotEqualTo(request.getEndDate());
+    }
+
 
     @DisplayName("해당 플랜의 OWNER일 경우, 플랜 공개 여부 업데이트에 성공한다.")
     @Test
@@ -322,6 +494,37 @@ class PlanControllerUpdateTest extends ControllerTestSupport {
         assertThat(beforePlan.get().getIsPublic()).isNotEqualTo(request.getIsPublic());
         assertThat(beforePlan.get().getName()).isEqualTo(publicPlan.getName());
         assertThat(beforePlan.get().getName()).isNotEqualTo(request.getName());
+    }
+
+    @DisplayName("해당 플랜의 MEMBER일 경우, 여행 시작 날짜 업데이트에 실패하고, 403을 반환한다.")
+    @Test
+    void shouldThrowAccessDenied_whenMemberTriesToUpdateStartDate() throws Exception {
+        //given
+        UpdatePlanRequest request = UpdatePlanRequest.builder()
+                .startDate(LocalDate.parse("2025-01-01"))
+                .build();
+
+        String token = buildToken(member.getId(), "access", issuer, Instant.now().plusSeconds(10000));
+
+        Optional<Plan> beforePlan = planRepository.findById(publicPlan.getId());
+        assertThat(beforePlan).isPresent();
+        assertThat(beforePlan.get().getName()).isEqualTo(publicPlan.getName());
+        assertThat(beforePlan.get().getName()).isNotEqualTo(request.getName());
+
+        //when, then
+        mockMvc.perform(
+                        patch("/api/v1/plans/" + publicPlan.getId())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("Forbidden"))
+                .andExpect(jsonPath("$.message").value("해당 리소스를 수정 할 권한이 없습니다."));
+
+        Optional<Plan> afterPlan = planRepository.findById(publicPlan.getId());
+        assertThat(afterPlan).isPresent();
+        assertThat(afterPlan.get().getStartDate()).isEqualTo(publicPlan.getStartDate());
+        assertThat(afterPlan.get().getStartDate()).isNotEqualTo(request.getStartDate());
     }
 
     @DisplayName("해당 플랜에 참여하지 않은 유저의 경우, 플랜 이름 업데이트에 실패하고, 403을 반환한다.")

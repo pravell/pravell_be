@@ -7,6 +7,7 @@ import com.pravell.common.exception.AccessDeniedException;
 import com.pravell.plan.domain.model.Plan;
 import com.pravell.plan.domain.model.PlanUserStatus;
 import com.pravell.plan.domain.model.PlanUsers;
+import com.pravell.plan.domain.service.PlanAuthorizationService;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
@@ -14,7 +15,7 @@ import org.junit.jupiter.api.Test;
 
 class DeletePlanServiceTest {
 
-    private final DeletePlanService deletePlanService = new DeletePlanService();
+    private final DeletePlanService deletePlanService = new DeletePlanService(new PlanAuthorizationService());
 
     private final UUID ownerId = UUID.randomUUID();
     private final UUID memberId = UUID.randomUUID();

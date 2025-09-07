@@ -2,6 +2,7 @@ package com.pravell.plan.presentation.request;
 
 import com.pravell.plan.application.dto.request.UpdatePlanApplicationRequest;
 import jakarta.validation.constraints.Size;
+import java.time.LocalDate;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -13,11 +14,15 @@ public class UpdatePlanRequest {
     private String name;
 
     private Boolean isPublic;
+    private LocalDate startDate;
+    private LocalDate endDate;
 
     public UpdatePlanApplicationRequest toApplicationRequest(){
         return UpdatePlanApplicationRequest.builder()
                 .name(this.name)
                 .isPublic(this.isPublic)
+                .startDate(this.startDate)
+                .endDate(this.endDate)
                 .build();
     }
 

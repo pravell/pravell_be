@@ -4,6 +4,7 @@ import com.pravell.plan.application.dto.request.CreatePlanApplicationRequest;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import java.time.LocalDate;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -18,10 +19,18 @@ public class CreatePlanRequest {
     @NotNull(message = "공개 여부를 지정해야 합니다.")
     private Boolean isPublic;
 
+    @NotNull(message = "여행 시작일은 생략이 불가능합니다.")
+    private LocalDate startDate;
+
+    @NotNull(message = "여행 종료일은 생략이 불가능합니다.")
+    private LocalDate endDate;
+
     public CreatePlanApplicationRequest toApplicationRequest(){
         return CreatePlanApplicationRequest.builder()
                 .name(this.name)
                 .isPublic(this.isPublic)
+                .startDate(this.startDate)
+                .endDate(this.endDate)
                 .build();
     }
 

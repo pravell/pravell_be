@@ -31,21 +31,8 @@ public class FindPlaceService {
     public List<FindPlanPlacesResponse> findAll(UUID userId, UUID planId, List<PlanMember> planMembers,
                                                 boolean isPlanPublic) {
         validateAccessToPlan(userId, planMembers, planId, isPlanPublic);
-
         List<PinPlace> pinPlaces = pinPlaceRepository.findAllByPlanId(planId);
-
-        return pinPlaces.stream().map(pp -> {
-            return FindPlanPlacesResponse.builder()
-                    .id(pp.getId())
-                    .nickname(pp.getNickname())
-                    .title(pp.getTitle())
-                    .mapx(pp.getMapx())
-                    .mapy(pp.getMapy())
-                    .lat(pp.getLatitude())
-                    .lng(pp.getLongitude())
-                    .pinColor(pp.getPinColor())
-                    .build();
-        }).toList();
+        return buildFindPlanPlacesResponses(pinPlaces);
     }
 
     @Transactional(readOnly = true)
@@ -56,6 +43,25 @@ public class FindPlaceService {
         List<String> hours = parseHours(place);
 
         return buildPlaceResponse(place, hours);
+    }
+
+    private List<FindPlanPlacesResponse> buildFindPlanPlacesResponses(List<PinPlace> pinPlaces) {
+        return pinPlaces.stream().map(pp -> {
+            List<String> hours = parseHours(pp);
+            return FindPlanPlacesResponse.builder()
+                    .id(pp.getId())
+                    .nickname(pp.getNickname())
+                    .title(pp.getTitle())
+                    .mapx(pp.getMapx())
+                    .mapy(pp.getMapy())
+                    .lat(pp.getLatitude())
+                    .lng(pp.getLongitude())
+                    .pinColor(pp.getPinColor())
+                    .address(pp.getAddress())
+                    .roadAddress(pp.getRoadAddress())
+                    .hours(hours)
+                    .build();
+        }).toList();
     }
 
     private void validateAccessToPlan(UUID userId, List<PlanMember> planMembers, UUID planId, boolean isPlanPublic) {
