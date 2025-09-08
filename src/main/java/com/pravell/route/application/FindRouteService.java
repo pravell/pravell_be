@@ -48,14 +48,16 @@ public class FindRouteService {
     }
 
     private List<FindRoutesResponse> buildFindRoutesResponse(List<Route> routes) {
-        return routes.stream().map(r -> {
-            return FindRoutesResponse.builder()
-                    .routeId(r.getId())
-                    .name(r.getName())
-                    .description(r.getDescription())
-                    .createdAt(r.getCreatedAt())
-                    .build();
-        }).toList();
+        return routes.stream()
+                .filter(r -> !r.isDeleted())
+                .map(r -> {
+                    return FindRoutesResponse.builder()
+                            .routeId(r.getId())
+                            .name(r.getName())
+                            .description(r.getDescription())
+                            .createdAt(r.getCreatedAt())
+                            .build();
+                }).toList();
     }
 
 }

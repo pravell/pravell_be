@@ -85,6 +85,7 @@ class RouteControllerCreateTest extends RouteControllerTestSupport {
         assertThat(after.get().getName()).isEqualTo(request.getName());
         assertThat(after.get().getDescription()).isEqualTo(request.getDescription());
         assertThat(after.get().getPlanId()).isEqualTo(request.getPlanId());
+        assertThat(after.get().isDeleted()).isFalse();
     }
 
     private static Stream<Arguments> provideValidRouteCreationAuthorities() {
@@ -138,6 +139,7 @@ class RouteControllerCreateTest extends RouteControllerTestSupport {
         assertThat(after.get().getName()).isEqualTo(request.getName());
         assertThat(after.get().getDescription()).isEqualTo(request.getDescription());
         assertThat(after.get().getPlanId()).isEqualTo(request.getPlanId());
+        assertThat(after.get().isDeleted()).isFalse();
     }
 
     @DisplayName("루트를 생성할 플랜에서 탈퇴, 강퇴, 차단, 비참여 유저는 루트를 생성할 수 없고, 403을 반환한다.")

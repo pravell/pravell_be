@@ -30,6 +30,7 @@ public class Route extends AggregateRoot {
     private String name;
 
     private String description;
+    private boolean isDeleted;
 
     public static Route create(UUID planId, String name, String description) {
         validateCreate(planId, name, description);
@@ -39,7 +40,12 @@ public class Route extends AggregateRoot {
                 .planId(planId)
                 .name(name)
                 .description(description)
+                .isDeleted(false)
                 .build();
+    }
+
+    public void delete() {
+        this.isDeleted = true;
     }
 
     private static void validateCreate(UUID planId, String name, String description) {
@@ -68,5 +74,4 @@ public class Route extends AggregateRoot {
             throw new IllegalArgumentException("루트 설명은 2 ~ 50자 사이여야 합니다.");
         }
     }
-
 }

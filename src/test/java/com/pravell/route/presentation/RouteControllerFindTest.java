@@ -38,7 +38,7 @@ class RouteControllerFindTest extends RouteControllerTestSupport {
         routeRepository.deleteAllInBatch();
     }
 
-    @DisplayName("PRIVATE 플랜은 플랜의 멤버, 소유자만 플랜에 속한 루트 조회가 가능하다.")
+    @DisplayName("PRIVATE 플랜은 플랜의 멤버, 소유자만 플랜에 속한 삭제되지 않은 루트 조회가 가능하다.")
     @ParameterizedTest(name = "[{index}] 권한 : {0}")
     @MethodSource("providePrivatePlanUserRoles")
     void shouldAllowRouteAccess_whenUserIsOwnerOrMemberInPrivatePlan(String role, PlanUserStatus planUserStatus)
@@ -54,11 +54,12 @@ class RouteControllerFindTest extends RouteControllerTestSupport {
         PlanUsers planUsers = getPlanUsers(plan.getId(), user.getId(), planUserStatus);
         planUsersRepository.save(planUsers);
 
-        Route route1 = getRoute(plan.getId());
-        Route route2 = getRoute(plan.getId());
+        Route route1 = getRoute(plan.getId(), false);
+        Route route2 = getRoute(plan.getId(), false);
+        Route route3 = getRoute(plan.getId(), true);
 
-        Route route3 = getRoute(plan2.getId());
-        routeRepository.saveAll(List.of(route1, route2, route3));
+        Route route4 = getRoute(plan2.getId(), false);
+        routeRepository.saveAll(List.of(route1, route2, route3, route4));
 
         String token = buildToken(user.getId(), "access", issuer, Instant.now().plusSeconds(10000));
 
@@ -108,11 +109,12 @@ class RouteControllerFindTest extends RouteControllerTestSupport {
             planUsersRepository.save(planUsers);
         }
 
-        Route route1 = getRoute(plan.getId());
-        Route route2 = getRoute(plan.getId());
+        Route route1 = getRoute(plan.getId(), false);
+        Route route2 = getRoute(plan.getId(), false);
+        Route route3 = getRoute(plan.getId(), true);
 
-        Route route3 = getRoute(plan2.getId());
-        routeRepository.saveAll(List.of(route1, route2, route3));
+        Route route4 = getRoute(plan2.getId(), false);
+        routeRepository.saveAll(List.of(route1, route2, route3, route4));
 
         String token = buildToken(user.getId(), "access", issuer, Instant.now().plusSeconds(10000));
 
@@ -153,11 +155,12 @@ class RouteControllerFindTest extends RouteControllerTestSupport {
             planUsersRepository.save(planUsers);
         }
 
-        Route route1 = getRoute(plan.getId());
-        Route route2 = getRoute(plan.getId());
+        Route route1 = getRoute(plan.getId(), false);
+        Route route2 = getRoute(plan.getId(), false);
+        Route route3 = getRoute(plan.getId(), true);
 
-        Route route3 = getRoute(plan2.getId());
-        routeRepository.saveAll(List.of(route1, route2, route3));
+        Route route4 = getRoute(plan2.getId(), false);
+        routeRepository.saveAll(List.of(route1, route2, route3, route4));
 
         String token = buildToken(user.getId(), "access", issuer, Instant.now().plusSeconds(10000));
 
@@ -206,11 +209,12 @@ class RouteControllerFindTest extends RouteControllerTestSupport {
         PlanUsers planUsers = getPlanUsers(plan.getId(), user.getId(), PlanUserStatus.BLOCKED);
         planUsersRepository.save(planUsers);
 
-        Route route1 = getRoute(plan.getId());
-        Route route2 = getRoute(plan.getId());
+        Route route1 = getRoute(plan.getId(), false);
+        Route route2 = getRoute(plan.getId(), false);
+        Route route3 = getRoute(plan.getId(), true);
 
-        Route route3 = getRoute(plan2.getId());
-        routeRepository.saveAll(List.of(route1, route2, route3));
+        Route route4 = getRoute(plan2.getId(), false);
+        routeRepository.saveAll(List.of(route1, route2, route3, route4));
 
         String token = buildToken(user.getId(), "access", issuer, Instant.now().plusSeconds(10000));
 
@@ -238,11 +242,12 @@ class RouteControllerFindTest extends RouteControllerTestSupport {
         PlanUsers planUsers = getPlanUsers(plan.getId(), user.getId(), PlanUserStatus.OWNER);
         planUsersRepository.save(planUsers);
 
-        Route route1 = getRoute(plan.getId());
-        Route route2 = getRoute(plan.getId());
+        Route route1 = getRoute(plan.getId(), false);
+        Route route2 = getRoute(plan.getId(), false);
+        Route route3 = getRoute(plan.getId(), true);
 
-        Route route3 = getRoute(plan2.getId());
-        routeRepository.saveAll(List.of(route1, route2, route3));
+        Route route4 = getRoute(plan2.getId(), false);
+        routeRepository.saveAll(List.of(route1, route2, route3, route4));
 
         String token = buildToken(user.getId(), "access", issuer, Instant.now().plusSeconds(10000));
 
@@ -283,11 +288,12 @@ class RouteControllerFindTest extends RouteControllerTestSupport {
         Plan plan2 = getPlan(false, true);
         planRepository.saveAll(List.of(plan, plan2));
 
-        Route route1 = getRoute(plan.getId());
-        Route route2 = getRoute(plan.getId());
+        Route route1 = getRoute(plan.getId(), false);
+        Route route2 = getRoute(plan.getId(), false);
+        Route route3 = getRoute(plan.getId(), true);
 
-        Route route3 = getRoute(plan2.getId());
-        routeRepository.saveAll(List.of(route1, route2, route3));
+        Route route4 = getRoute(plan2.getId(), false);
+        routeRepository.saveAll(List.of(route1, route2, route3, route4));
 
         String token = buildToken(UUID.randomUUID(), "access", issuer, Instant.now().plusSeconds(10000));
 
@@ -316,11 +322,12 @@ class RouteControllerFindTest extends RouteControllerTestSupport {
         PlanUsers planUsers = getPlanUsers(plan.getId(), user.getId(), PlanUserStatus.OWNER);
         planUsersRepository.save(planUsers);
 
-        Route route1 = getRoute(plan.getId());
-        Route route2 = getRoute(plan.getId());
+        Route route1 = getRoute(plan.getId(), false);
+        Route route2 = getRoute(plan.getId(), false);
+        Route route3 = getRoute(plan.getId(), true);
 
-        Route route3 = getRoute(plan2.getId());
-        routeRepository.saveAll(List.of(route1, route2, route3));
+        Route route4 = getRoute(plan2.getId(), false);
+        routeRepository.saveAll(List.of(route1, route2, route3, route4));
 
         String token = buildToken(user.getId(), "access", issuer, Instant.now().plusSeconds(10000));
 
@@ -357,11 +364,12 @@ class RouteControllerFindTest extends RouteControllerTestSupport {
         PlanUsers planUsers = getPlanUsers(plan.getId(), user.getId(), PlanUserStatus.OWNER);
         planUsersRepository.save(planUsers);
 
-        Route route1 = getRoute(plan.getId());
-        Route route2 = getRoute(plan.getId());
+        Route route1 = getRoute(plan.getId(), false);
+        Route route2 = getRoute(plan.getId(), false);
+        Route route3 = getRoute(plan.getId(), true);
 
-        Route route3 = getRoute(plan2.getId());
-        routeRepository.saveAll(List.of(route1, route2, route3));
+        Route route4 = getRoute(plan2.getId(), false);
+        routeRepository.saveAll(List.of(route1, route2, route3, route4));
 
         String token = buildToken(user.getId(), "access", issuer, Instant.now().minusSeconds(10000));
 
@@ -389,11 +397,12 @@ class RouteControllerFindTest extends RouteControllerTestSupport {
         PlanUsers planUsers = getPlanUsers(plan.getId(), user.getId(), PlanUserStatus.OWNER);
         planUsersRepository.save(planUsers);
 
-        Route route1 = getRoute(plan.getId());
-        Route route2 = getRoute(plan.getId());
+        Route route1 = getRoute(plan.getId(), false);
+        Route route2 = getRoute(plan.getId(), false);
+        Route route3 = getRoute(plan.getId(), true);
 
-        Route route3 = getRoute(plan2.getId());
-        routeRepository.saveAll(List.of(route1, route2, route3));
+        Route route4 = getRoute(plan2.getId(), false);
+        routeRepository.saveAll(List.of(route1, route2, route3, route4));
 
         String token = buildToken(user.getId(), "access", issuer, Instant.now().plusSeconds(10000)) + "aa";
 
@@ -421,11 +430,12 @@ class RouteControllerFindTest extends RouteControllerTestSupport {
         PlanUsers planUsers = getPlanUsers(plan.getId(), user.getId(), PlanUserStatus.OWNER);
         planUsersRepository.save(planUsers);
 
-        Route route1 = getRoute(plan.getId());
-        Route route2 = getRoute(plan.getId());
+        Route route1 = getRoute(plan.getId(), false);
+        Route route2 = getRoute(plan.getId(), false);
+        Route route3 = getRoute(plan.getId(), true);
 
-        Route route3 = getRoute(plan2.getId());
-        routeRepository.saveAll(List.of(route1, route2, route3));
+        Route route4 = getRoute(plan2.getId(), false);
+        routeRepository.saveAll(List.of(route1, route2, route3, route4));
 
         String token = buildToken(user.getId(), "refresh", issuer, Instant.now().plusSeconds(10000));
 

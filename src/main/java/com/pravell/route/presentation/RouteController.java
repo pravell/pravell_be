@@ -5,12 +5,14 @@ import com.pravell.route.application.RouteFacade;
 import com.pravell.route.application.dto.response.CreateRouteResponse;
 import com.pravell.route.application.dto.response.FindRoutesResponse;
 import com.pravell.route.presentation.request.CreateRouteRequest;
+import com.pravell.route.presentation.request.DeleteRouteRequest;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -37,9 +39,17 @@ public class RouteController {
 
     @GetMapping("/{planId}")
     public ResponseEntity<List<FindRoutesResponse>> findRoutes(@RequestHeader("authorization") String header,
-                                                               @PathVariable UUID planId){
+                                                               @PathVariable UUID planId) {
         UUID id = commonJwtUtil.getUserIdFromToken(header);
         return ResponseEntity.ok(routeFacade.findRoutes(id, planId));
+    }
+
+    @DeleteMapping
+    public ResponseEntity<Void> deleteRoute(@RequestHeader("authorization") String header,
+                                            @RequestBody DeleteRouteRequest deleteRouteRequest) {
+        UUID id = commonJwtUtil.getUserIdFromToken(header);
+        routeFacade.deleteRoutes(id, deleteRouteRequest.toApplicationRequest());
+        return ResponseEntity.noContent().build();
     }
 
 }

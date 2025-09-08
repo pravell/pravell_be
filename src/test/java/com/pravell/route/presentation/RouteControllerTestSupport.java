@@ -62,12 +62,13 @@ public abstract class RouteControllerTestSupport extends ControllerTestSupport {
                 .build();
     }
 
-    protected Route getRoute(UUID planId) {
+    protected Route getRoute(UUID planId, boolean isDeleted) {
         return Route.builder()
                 .id(UUID.randomUUID())
                 .planId(planId)
                 .name("플랜 이름" + UUID.randomUUID())
                 .description("플랜 설명" + UUID.randomUUID())
+                .isDeleted(isDeleted)
                 .build();
     }
 
