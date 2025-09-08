@@ -3,12 +3,16 @@ package com.pravell.route.presentation;
 import com.pravell.common.util.CommonJwtUtil;
 import com.pravell.route.application.RouteFacade;
 import com.pravell.route.application.dto.response.CreateRouteResponse;
+import com.pravell.route.application.dto.response.FindRoutesResponse;
 import com.pravell.route.presentation.request.CreateRouteRequest;
 import jakarta.validation.Valid;
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -30,4 +34,12 @@ public class RouteController {
         CreateRouteResponse response = routeFacade.createRoute(id, createRouteRequest.toApplicationRequest());
         return ResponseEntity.created(URI.create("/" + response.getRouteId().toString())).body(response);
     }
+
+    @GetMapping("/{planId}")
+    public ResponseEntity<List<FindRoutesResponse>> findRoutes(@RequestHeader("authorization") String header,
+                                                               @PathVariable UUID planId){
+        UUID id = commonJwtUtil.getUserIdFromToken(header);
+        return ResponseEntity.ok(routeFacade.findRoutes(id, planId));
+    }
+
 }

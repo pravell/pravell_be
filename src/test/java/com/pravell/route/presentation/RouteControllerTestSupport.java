@@ -6,6 +6,7 @@ import com.pravell.plan.domain.model.PlanUserStatus;
 import com.pravell.plan.domain.model.PlanUsers;
 import com.pravell.plan.domain.repository.PlanRepository;
 import com.pravell.plan.domain.repository.PlanUsersRepository;
+import com.pravell.route.domain.model.Route;
 import com.pravell.route.domain.repository.RouteRepository;
 import com.pravell.user.domain.model.User;
 import com.pravell.user.domain.model.UserStatus;
@@ -58,6 +59,15 @@ public abstract class RouteControllerTestSupport extends ControllerTestSupport {
                 .planId(planId)
                 .userId(userId)
                 .planUserStatus(status)
+                .build();
+    }
+
+    protected Route getRoute(UUID planId) {
+        return Route.builder()
+                .id(UUID.randomUUID())
+                .planId(planId)
+                .name("플랜 이름" + UUID.randomUUID())
+                .description("플랜 설명" + UUID.randomUUID())
                 .build();
     }
 

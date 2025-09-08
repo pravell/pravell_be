@@ -4,6 +4,7 @@ import com.pravell.plan.application.PlanService;
 import com.pravell.plan.application.dto.PlanMemberDTO;
 import com.pravell.route.application.dto.request.CreateRouteApplicationRequest;
 import com.pravell.route.application.dto.response.CreateRouteResponse;
+import com.pravell.route.application.dto.response.FindRoutesResponse;
 import com.pravell.route.domain.model.PlanMember;
 import com.pravell.route.domain.model.PlanMemberStatus;
 import com.pravell.user.application.UserService;
@@ -19,6 +20,7 @@ public class RouteFacade {
     private final UserService userService;
     private final PlanService planService;
     private final CreateRouteService createRouteService;
+    private final FindRouteService findRouteService;
 
     public CreateRouteResponse createRoute(UUID userId, CreateRouteApplicationRequest request) {
         validateUserAndPlan(userId, request);
@@ -26,6 +28,15 @@ public class RouteFacade {
         List<PlanMember> planMembers = getPlanMembers(request.getPlanId());
 
         return createRouteService.create(userId, request, planMembers);
+    }
+
+    public List<FindRoutesResponse> findRoutes(UUID userId, UUID planId) {
+        userService.findUserById(userId);
+
+        boolean isPublic = planService.isPlanPublic(planId);
+        List<PlanMember> planMembers = getPlanMembers(planId);
+
+        return findRouteService.findAll(userId, planId, planMembers, isPublic);
     }
 
     private void validateUserAndPlan(UUID userId, CreateRouteApplicationRequest request) {
