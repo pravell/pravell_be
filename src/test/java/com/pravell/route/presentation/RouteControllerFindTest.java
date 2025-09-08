@@ -10,7 +10,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.pravell.plan.domain.model.Plan;
 import com.pravell.plan.domain.model.PlanUserStatus;
 import com.pravell.plan.domain.model.PlanUsers;
-import com.pravell.route.application.dto.response.FindRoutesResponse;
+import com.pravell.route.application.dto.response.RouteResponse;
 import com.pravell.route.domain.model.Route;
 import com.pravell.user.domain.model.User;
 import com.pravell.user.domain.model.UserStatus;
@@ -74,7 +74,7 @@ class RouteControllerFindTest extends RouteControllerTestSupport {
         //then
         String content = mvcResult.getResponse().getContentAsString();
 
-        List<FindRoutesResponse> responseList = objectMapper.readValue(content, new TypeReference<>() {
+        List<RouteResponse> responseList = objectMapper.readValue(content, new TypeReference<>() {
         });
 
         assertThat(responseList).hasSize(2)
@@ -175,7 +175,7 @@ class RouteControllerFindTest extends RouteControllerTestSupport {
         //then
         String content = mvcResult.getResponse().getContentAsString();
 
-        List<FindRoutesResponse> responseList = objectMapper.readValue(content, new TypeReference<>() {
+        List<RouteResponse> responseList = objectMapper.readValue(content, new TypeReference<>() {
         });
 
         assertThat(responseList).hasSize(2)

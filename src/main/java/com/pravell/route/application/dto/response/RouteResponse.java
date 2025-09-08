@@ -7,7 +7,7 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class FindRoutesResponse {
+public class RouteResponse {
 
     private UUID routeId;
     private String name;

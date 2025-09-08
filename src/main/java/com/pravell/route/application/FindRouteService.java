@@ -1,7 +1,7 @@
 package com.pravell.route.application;
 
 import com.pravell.common.exception.AccessDeniedException;
-import com.pravell.route.application.dto.response.FindRoutesResponse;
+import com.pravell.route.application.dto.response.RouteResponse;
 import com.pravell.route.domain.model.PlanMember;
 import com.pravell.route.domain.model.Route;
 import com.pravell.route.domain.repository.RouteRepository;
@@ -22,7 +22,7 @@ public class FindRouteService {
     private final RouteAuthorizationService routeAuthorizationService;
 
     @Transactional(readOnly = true)
-    public List<FindRoutesResponse> findAll(UUID userId, UUID planId, List<PlanMember> planMembers, boolean isPublic) {
+    public List<RouteResponse> findAll(UUID userId, UUID planId, List<PlanMember> planMembers, boolean isPublic) {
         validateRouteFind(userId, planId, planMembers, isPublic);
 
         List<Route> routes = routeRepository.findAllByPlanId(planId);
@@ -47,11 +47,11 @@ public class FindRouteService {
         throw new AccessDeniedException("해당 리소스에 접근 할 권한이 없습니다.");
     }
 
-    private List<FindRoutesResponse> buildFindRoutesResponse(List<Route> routes) {
+    private List<RouteResponse> buildFindRoutesResponse(List<Route> routes) {
         return routes.stream()
                 .filter(r -> !r.isDeleted())
                 .map(r -> {
-                    return FindRoutesResponse.builder()
+                    return RouteResponse.builder()
                             .routeId(r.getId())
                             .name(r.getName())
                             .description(r.getDescription())

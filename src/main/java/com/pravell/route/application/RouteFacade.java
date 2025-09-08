@@ -4,8 +4,9 @@ import com.pravell.plan.application.PlanService;
 import com.pravell.plan.application.dto.PlanMemberDTO;
 import com.pravell.route.application.dto.request.CreateRouteApplicationRequest;
 import com.pravell.route.application.dto.request.DeleteRouteApplicationRequest;
+import com.pravell.route.application.dto.request.UpdateRouteApplicationRequest;
 import com.pravell.route.application.dto.response.CreateRouteResponse;
-import com.pravell.route.application.dto.response.FindRoutesResponse;
+import com.pravell.route.application.dto.response.RouteResponse;
 import com.pravell.route.domain.model.PlanMember;
 import com.pravell.route.domain.model.PlanMemberStatus;
 import com.pravell.route.domain.model.Route;
@@ -26,6 +27,7 @@ public class RouteFacade {
     private final FindRouteService findRouteService;
     private final RouteService routeService;
     private final DeleteRouteService deleteRouteService;
+    private final UpdateRouteService updateRouteService;
 
     public CreateRouteResponse createRoute(UUID userId, CreateRouteApplicationRequest request) {
         validateUserAndPlan(userId, request.getPlanId());
@@ -35,7 +37,7 @@ public class RouteFacade {
         return createRouteService.create(userId, request, planMembers);
     }
 
-    public List<FindRoutesResponse> findRoutes(UUID userId, UUID planId) {
+    public List<RouteResponse> findRoutes(UUID userId, UUID planId) {
         userService.findUserById(userId);
 
         boolean isPublic = planService.isPlanPublic(planId);
@@ -55,6 +57,16 @@ public class RouteFacade {
 
             deleteRouteService.delete(route, userId, planMembers);
         });
+    }
+
+    public RouteResponse updateRoute(UUID userId, UUID routeId, UpdateRouteApplicationRequest request) {
+        userService.findUserById(userId);
+
+        Route route = routeService.findById(routeId);
+        planService.findPlan(route.getPlanId());
+        List<PlanMember> planMembers = getPlanMembers(route.getPlanId());
+
+        return updateRouteService.update(request, route, userId, planMembers);
     }
 
     private void validateUserAndPlan(UUID userId, UUID planId) {

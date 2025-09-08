@@ -3,9 +3,10 @@ package com.pravell.route.presentation;
 import com.pravell.common.util.CommonJwtUtil;
 import com.pravell.route.application.RouteFacade;
 import com.pravell.route.application.dto.response.CreateRouteResponse;
-import com.pravell.route.application.dto.response.FindRoutesResponse;
+import com.pravell.route.application.dto.response.RouteResponse;
 import com.pravell.route.presentation.request.CreateRouteRequest;
 import com.pravell.route.presentation.request.DeleteRouteRequest;
+import com.pravell.route.presentation.request.UpdateRouteRequest;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
@@ -14,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -38,8 +40,8 @@ public class RouteController {
     }
 
     @GetMapping("/{planId}")
-    public ResponseEntity<List<FindRoutesResponse>> findRoutes(@RequestHeader("authorization") String header,
-                                                               @PathVariable UUID planId) {
+    public ResponseEntity<List<RouteResponse>> findRoutes(@RequestHeader("authorization") String header,
+                                                          @PathVariable UUID planId) {
         UUID id = commonJwtUtil.getUserIdFromToken(header);
         return ResponseEntity.ok(routeFacade.findRoutes(id, planId));
     }
@@ -50,6 +52,14 @@ public class RouteController {
         UUID id = commonJwtUtil.getUserIdFromToken(header);
         routeFacade.deleteRoutes(id, deleteRouteRequest.toApplicationRequest());
         return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{routeId}")
+    public ResponseEntity<RouteResponse> updateRoutes(@RequestHeader("authorization") String header,
+                                                      @Valid @RequestBody UpdateRouteRequest updateRouteRequest,
+                                                      @PathVariable UUID routeId) {
+        UUID id = commonJwtUtil.getUserIdFromToken(header);
+        return ResponseEntity.ok(routeFacade.updateRoute(id, routeId, updateRouteRequest.toApplicationRequest()));
     }
 
 }

@@ -44,14 +44,24 @@ public class Route extends AggregateRoot {
                 .build();
     }
 
-    public void delete() {
-        this.isDeleted = true;
-    }
-
     private static void validateCreate(UUID planId, String name, String description) {
         validatePlanId(planId);
         validateName(name);
         validateDescription(description);
+    }
+
+    public void delete() {
+        this.isDeleted = true;
+    }
+
+    public void updateName(String name) {
+        validateName(name);
+        this.name = name;
+    }
+
+    public void updateDescription(String description) {
+        validateDescription(description);
+        this.description = description;
     }
 
     private static void validatePlanId(UUID planId) {
