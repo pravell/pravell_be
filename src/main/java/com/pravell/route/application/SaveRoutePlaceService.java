@@ -2,7 +2,7 @@ package com.pravell.route.application;
 
 import com.pravell.common.exception.AccessDeniedException;
 import com.pravell.route.application.dto.request.SaveRoutePlaceApplicationRequest;
-import com.pravell.route.application.dto.response.SaveRoutePlaceResponse;
+import com.pravell.route.application.dto.response.RoutePlaceResponse;
 import com.pravell.route.domain.model.Place;
 import com.pravell.route.domain.model.PlanMember;
 import com.pravell.route.domain.model.RoutePlace;
@@ -24,8 +24,8 @@ public class SaveRoutePlaceService {
     private final RoutePlaceRepository routePlaceRepository;
 
     @Transactional
-    public SaveRoutePlaceResponse save(SaveRoutePlaceApplicationRequest request, UUID routeId, UUID userId,
-                                       List<PlanMember> planMembers, Place place) {
+    public RoutePlaceResponse save(SaveRoutePlaceApplicationRequest request, UUID routeId, UUID userId,
+                                   List<PlanMember> planMembers, Place place) {
         validateSaveRoutePlace(routeId, userId, planMembers);
         RoutePlace saved = saveRoutePlace(request, routeId);
         log.info("{} 유저가 {} 루트에 {} 장소 저장", userId, routeId, saved.getId());
@@ -46,8 +46,8 @@ public class SaveRoutePlaceService {
                         request.getNickname(), request.getDate()));
     }
 
-    private SaveRoutePlaceResponse buildSaveRoutePlaceResponse(Place place, RoutePlace saved) {
-        return SaveRoutePlaceResponse.builder()
+    private RoutePlaceResponse buildSaveRoutePlaceResponse(Place place, RoutePlace saved) {
+        return RoutePlaceResponse.builder()
                 .routePlaceId(saved.getId())
                 .pinPlaceId(saved.getPinPlaceId())
                 .title(place.getTitle())
@@ -62,6 +62,7 @@ public class SaveRoutePlaceService {
                 .lat(place.getLat())
                 .lng(place.getLng())
                 .color(place.getColor())
+                .isPinPlaceDeleted(null)
                 .build();
     }
 

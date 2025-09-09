@@ -4,6 +4,7 @@ import com.pravell.place.application.dto.PlaceDTO;
 import com.pravell.place.domain.exception.PlaceNotFoundException;
 import com.pravell.place.domain.model.PinPlace;
 import com.pravell.place.domain.repository.PinPlaceRepository;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +32,7 @@ public class PlaceService {
         }
 
         return PlaceDTO.builder()
+                .pinPlaceId(pinPlace.get().getId())
                 .title(pinPlace.get().getTitle())
                 .address(pinPlace.get().getAddress())
                 .roadAddress(pinPlace.get().getRoadAddress())
@@ -40,6 +42,25 @@ public class PlaceService {
                 .lng(pinPlace.get().getLongitude())
                 .color(pinPlace.get().getPinColor())
                 .build();
+    }
+
+    @Transactional(readOnly = true)
+    public List<PlaceDTO> findAllByPlaceIds(List<Long> placeIds) {
+        List<PinPlace> pinPlaces = pinPlaceRepository.findAllByIdIn(placeIds);
+
+        return pinPlaces.stream().map(pp -> {
+            return PlaceDTO.builder()
+                    .pinPlaceId(pp.getId())
+                    .title(pp.getTitle())
+                    .address(pp.getAddress())
+                    .roadAddress(pp.getAddress())
+                    .mapx(pp.getMapx())
+                    .mapy(pp.getMapy())
+                    .lat(pp.getLatitude())
+                    .lng(pp.getLongitude())
+                    .color(pp.getPinColor())
+                    .build();
+        }).toList();
     }
 
 }

@@ -9,6 +9,7 @@ import com.pravell.plan.domain.model.PlanUsers;
 import com.pravell.plan.domain.repository.PlanRepository;
 import com.pravell.plan.domain.repository.PlanUsersRepository;
 import com.pravell.route.domain.model.Route;
+import com.pravell.route.domain.model.RoutePlace;
 import com.pravell.route.domain.repository.RoutePlaceRepository;
 import com.pravell.route.domain.repository.RouteRepository;
 import com.pravell.user.domain.model.User;
@@ -100,6 +101,18 @@ public abstract class RoutePlaceControllerTestSupport extends ControllerTestSupp
                 .hours("정보 없음")
                 .latitude(new BigDecimal("123.4567"))
                 .longitude(new BigDecimal("23.45678"))
+                .build();
+    }
+
+    protected RoutePlace getRoutePlace(UUID routeId, Long pinPlaceId, Long sequence, String description,
+                                       String nickname, LocalDate date) {
+        return RoutePlace.builder()
+                .routeId(routeId)
+                .pinPlaceId(pinPlaceId)
+                .sequence(sequence)
+                .description(description)
+                .nickname(nickname)
+                .date(date)
                 .build();
     }
 

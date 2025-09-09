@@ -8,6 +8,7 @@ import lombok.Getter;
 @Builder
 public class Place {
 
+    private Long pinPlaceId;
     private String title;
     private String address;
     private String roadAddress;

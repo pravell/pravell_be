@@ -7,7 +7,7 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class SaveRoutePlaceResponse {
+public class RoutePlaceResponse {
 
     private Long routePlaceId;
     private Long pinPlaceId;
@@ -23,5 +23,6 @@ public class SaveRoutePlaceResponse {
     private BigDecimal lat;
     private BigDecimal lng;
     private String color;
+    private Boolean isPinPlaceDeleted;
 
 }
