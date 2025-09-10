@@ -4,9 +4,11 @@ import com.pravell.place.application.PlaceService;
 import com.pravell.place.application.dto.PlaceDTO;
 import com.pravell.plan.application.PlanService;
 import com.pravell.plan.application.dto.PlanMemberDTO;
+import com.pravell.route.application.dto.request.DeleteRoutePlacesApplicationRequest;
 import com.pravell.route.application.dto.request.SaveRoutePlaceApplicationRequest;
 import com.pravell.route.application.dto.request.UpdatePlaceApplicationRequest;
 import com.pravell.route.application.dto.response.RoutePlaceResponse;
+import com.pravell.route.domain.exception.RoutePlaceNotFoundException;
 import com.pravell.route.domain.model.Place;
 import com.pravell.route.domain.model.PlanMember;
 import com.pravell.route.domain.model.PlanMemberStatus;
@@ -30,6 +32,7 @@ public class RoutePlaceFacade {
     private final FindRoutePlaceService findRoutePlaceService;
     private final UpdateRoutePlaceService updateRoutePlaceService;
     private final RoutePlaceService routePlaceService;
+    private final DeleteRoutePlaceService deleteRoutePlaceService;
 
     public RoutePlaceResponse savePlace(UUID userId, UUID routeId, SaveRoutePlaceApplicationRequest request) {
         userService.findUserById(userId);
@@ -101,6 +104,28 @@ public class RoutePlaceFacade {
                 getPlace(routePlace.getPinPlaceId(), route) : getPlace(request.getPinPlaceId(), route);
     }
 
+    public void deletePlaces(UUID routeId, DeleteRoutePlacesApplicationRequest request, UUID userId) {
+        userService.findUserById(userId);
+
+        List<PlanMember> planMembers = getPlanMember(routeId);
+
+        validateRoutePlaceInRoute(routeId, request);
+        deleteRoutePlaceService.deleteAll(request, userId, planMembers, routeId);
+    }
+
+    private void validateRoutePlaceInRoute(UUID routeId, DeleteRoutePlacesApplicationRequest request) {
+        boolean exists = routePlaceService.existsRoutePlaceInRoute(routeId, request.getDeleteRoutePlaceId());
+        if (!exists) {
+            throw new RoutePlaceNotFoundException("루트에서 해당 장소를 찾을 수 없습니다.");
+        }
+    }
+
+    private List<PlanMember> getPlanMember(UUID routeId) {
+        Route route = routeService.findById(routeId);
+        planService.findPlan(route.getPlanId());
+        return getPlanMembers(route.getPlanId());
+    }
+
     private List<PlanMember> getPlanMembers(UUID planId) {
         List<PlanMemberDTO> planMembers = planService.findPlanMembers(planId);
 
@@ -129,5 +154,4 @@ public class RoutePlaceFacade {
                 .color(placeDto.getColor())
                 .build();
     }
-
 }

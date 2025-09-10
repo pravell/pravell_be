@@ -15,4 +15,6 @@ public interface RoutePlaceRepository extends JpaRepository<RoutePlace, Long> {
     Optional<Long> findMaxSequenceByRouteId(UUID routeId);
 
     List<RoutePlace> findAllByRouteId(UUID routeId);
+
+    long countByRouteIdAndIdIn(UUID routeId, List<Long> ids);
 }

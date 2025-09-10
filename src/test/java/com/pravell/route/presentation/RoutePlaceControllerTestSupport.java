@@ -121,4 +121,8 @@ public abstract class RoutePlaceControllerTestSupport extends ControllerTestSupp
                 .build();
     }
 
+    protected RoutePlace getRoutePlace(UUID routeId, Long pinPlaceId) {
+        return getRoutePlace(routeId, pinPlaceId, 10L, "장소 설명", "장소 별명", LocalDate.parse("2025-09-10"));
+    }
+
 }

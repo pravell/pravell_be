@@ -3,6 +3,7 @@ package com.pravell.route.presentation;
 import com.pravell.common.util.CommonJwtUtil;
 import com.pravell.route.application.RoutePlaceFacade;
 import com.pravell.route.application.dto.response.RoutePlaceResponse;
+import com.pravell.route.presentation.request.DeleteRoutePlacesRequest;
 import com.pravell.route.presentation.request.SaveRoutePlaceRequest;
 import com.pravell.route.presentation.request.UpdatePlaceRequest;
 import jakarta.validation.Valid;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -53,6 +55,15 @@ public class RoutePlaceController {
         UUID id = commonJwtUtil.getUserIdFromToken(header);
         return ResponseEntity.ok(
                 routePlaceFacade.updatePlace(routeId, routePlaceId, id, updatePlaceRequest.toApplicationRequest()));
+    }
+
+    @DeleteMapping
+    public ResponseEntity<Void> deleteRoutePlaces(@RequestHeader("authorization") String header,
+                                                  @PathVariable UUID routeId,
+                                                  @RequestBody DeleteRoutePlacesRequest deleteRoutePlacesRequest){
+        UUID id = commonJwtUtil.getUserIdFromToken(header);
+        routePlaceFacade.deletePlaces(routeId, deleteRoutePlacesRequest.toApplicationRequest(), id);
+        return ResponseEntity.noContent().build();
     }
 
 }
