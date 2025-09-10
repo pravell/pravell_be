@@ -1,0 +1,140 @@
+package com.pravell.user.application;
+
+import com.pravell.common.exception.InvalidCredentialsException;
+import com.pravell.user.application.dto.UserMemberDTO;
+import com.pravell.user.application.dto.request.SignUpApplicationRequest;
+import com.pravell.user.application.dto.request.UpdateUserApplicationRequest;
+import com.pravell.user.application.dto.response.UserProfileResponse;
+import com.pravell.user.domain.event.UserCreatedEvent;
+import com.pravell.user.domain.exception.UserNotFoundException;
+import com.pravell.user.domain.model.User;
+import com.pravell.user.domain.model.UserStatus;
+import com.pravell.user.domain.repository.UserRepository;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@RequiredArgsConstructor
+@Slf4j
+@Service
+public class UserService {
+
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    @Transactional
+    public UserCreatedEvent persistUser(SignUpApplicationRequest request) {
+        validSignUp(request);
+
+        String encodePassword = passwordEncoder.encode(request.getPassword());
+
+        UserCreatedEvent userCreatedEvent = User.createUser(request.getId(), encodePassword, request.getNickname());
+        userRepository.save(userCreatedEvent.getUser());
+
+        return userCreatedEvent;
+    }
+
+    private void validSignUp(SignUpApplicationRequest signUpApplicationRequest) {
+        boolean existsById = userRepository.existsByUserId(signUpApplicationRequest.getId());
+        if (existsById) {
+            throw new DuplicateKeyException("이미 존재하는 아이디입니다.");
+        }
+
+        boolean existsByNickname = userRepository.existsByNickname(signUpApplicationRequest.getNickname());
+        if (existsByNickname) {
+            throw new DuplicateKeyException("이미 존재하는 닉네임입니다.");
+        }
+
+    }
+
+    @Transactional(readOnly = true)
+    public User findUserByUserId(String id) {
+        Optional<User> user = userRepository.findByUserId(id);
+
+        if (user.isEmpty() || !user.get().getStatus().equals(UserStatus.ACTIVE)) {
+            log.warn("유저를 찾을 수 없습니다. Id : {}", id);
+            throw new UserNotFoundException("유저를 찾을 수 없습니다.");
+        }
+
+        return user.get();
+    }
+
+    @Transactional(readOnly = true)
+    public User findUserById(UUID id) {
+        Optional<User> user = userRepository.findById(id);
+
+        if (user.isEmpty() || !user.get().getStatus().equals(UserStatus.ACTIVE)) {
+            log.warn("유저를 찾을 수 없습니다. Id : {}", id);
+            throw new UserNotFoundException("유저를 찾을 수 없습니다.");
+        }
+
+        return user.get();
+    }
+
+    public void verifyPassword(String rawPassword, String encodedPassword) {
+        if (!passwordEncoder.matches(rawPassword, encodedPassword)) {
+            throw new InvalidCredentialsException("비밀번호가 일치하지 않습니다.");
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public UserProfileResponse getProfile(UUID id) {
+        User user = findUserById(id);
+
+        return UserProfileResponse.builder()
+                .userId(user.getUserId())
+                .nickname(user.getNickname())
+                .status(user.getStatus())
+                .build();
+    }
+
+    @Transactional
+    public void withDrawUser(UUID id) {
+        User user = findUserById(id);
+        user.withdraw();
+        log.info("유저 탈퇴. Id : {}", id);
+    }
+
+    @Transactional
+    public UserProfileResponse updateUser(UUID id, UpdateUserApplicationRequest updateUserApplicationRequest) {
+        User user = findUserById(id);
+        log.info("유저 업데이트. Id : {}, nicknameBefore : {}, nicknameAfter : {}",
+                id, user.getNickname(), updateUserApplicationRequest.getNickname());
+
+        if (userRepository.existsByNickname(updateUserApplicationRequest.getNickname())) {
+            throw new DuplicateKeyException("이미 존재하는 닉네임입니다.");
+        }
+
+        if (updateUserApplicationRequest.getNickname() != null &&
+                !user.getNickname().equals(updateUserApplicationRequest.getNickname())) {
+            user.updateNickname(updateUserApplicationRequest.getNickname());
+        }
+
+        return UserProfileResponse.builder()
+                .userId(user.getUserId())
+                .nickname(user.getNickname())
+                .status(user.getStatus())
+                .build();
+    }
+
+    @Transactional(readOnly = true)
+    public List<UserMemberDTO> findMembers(List<UUID> memberId) {
+        List<User> users = userRepository.findAllById(memberId);
+
+        return users.stream()
+                .filter(u -> u.getStatus().equals(UserStatus.ACTIVE))
+                .map(user -> {
+                    return UserMemberDTO.builder()
+                            .memberId(user.getId())
+                            .nickname(user.getNickname())
+                            .build();
+                }).toList();
+    }
+
+}

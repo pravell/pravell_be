@@ -1,0 +1,270 @@
+package com.pravell.user.application;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.*;
+
+import com.pravell.common.exception.InvalidCredentialsException;
+import com.pravell.user.application.dto.request.SignUpApplicationRequest;
+import com.pravell.user.application.dto.request.UpdateUserApplicationRequest;
+import com.pravell.user.application.dto.response.UserProfileResponse;
+import com.pravell.user.domain.event.UserCreatedEvent;
+import com.pravell.user.domain.exception.UserNotFoundException;
+import com.pravell.user.domain.model.User;
+import com.pravell.user.domain.model.UserStatus;
+import com.pravell.user.domain.repository.UserRepository;
+import java.util.Optional;
+import java.util.UUID;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.ActiveProfiles;
+
+@ActiveProfiles("test")
+@SpringBootTest
+class UserServiceTest {
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @AfterEach
+    void tearDown() {
+        userRepository.deleteAllInBatch();
+    }
+
+    @DisplayName("유저 저장에 성공하면 UserCreatedEvent를 반환한다.")
+    @Test
+    void shouldReturnUserCreatedEvent_whenUserIsSavedSuccessfully() {
+        //given
+        SignUpApplicationRequest request = SignUpApplicationRequest.builder()
+                .id("testId")
+                .password("testPassword")
+                .nickname("nickname")
+                .build();
+
+        //when
+        UserCreatedEvent userCreatedEvent = userService.persistUser(request);
+
+        //then
+        Optional<User> savedUser = userRepository.findByUserId(request.getId());
+        assertThat(savedUser).isPresent();
+        assertThat(savedUser.get().getPassword()).isNotEqualTo(request.getPassword());
+
+        assertThat(userCreatedEvent.getUser().getId()).isEqualTo(savedUser.get().getId());
+        assertThat(userCreatedEvent.getUser().getStatus()).isEqualTo(UserStatus.ACTIVE);
+        assertThat(userCreatedEvent.getUser().getUserId()).isEqualTo(request.getId());
+        assertThat(userCreatedEvent.getUser().getUserId()).isEqualTo(savedUser.get().getUserId());
+    }
+
+    @DisplayName("비밀번호가 인코딩된 비밀번호와 일치하면 검증에 성공한다.")
+    @Test
+    void shouldValidatePassword_whenMatchesEncodedPassword() {
+        //given
+        String password = "testPasswordd";
+        String encodePassword = passwordEncoder.encode(password);
+
+        //when, then
+        assertDoesNotThrow(() -> userService.verifyPassword(password, encodePassword));
+    }
+
+    @DisplayName("비밀번호가 인코딩된 비밀번호와 일치하지 않으면 예외가 발생한다.")
+    @Test
+    void shouldThrowException_whenPasswordDoesNotMatchEncodedPassword() {
+        //given
+        String password = "testPasswordd";
+        String encodePassword = passwordEncoder.encode("passwordddd");
+
+        //when, then
+        assertThatThrownBy(() -> userService.verifyPassword(password, encodePassword))
+                .isInstanceOf(InvalidCredentialsException.class)
+                .hasMessage("비밀번호가 일치하지 않습니다.");
+    }
+
+    @DisplayName("유저의 프로필 정보를 조회한다.")
+    @Test
+    void shouldReturnUserProfile_whenAccessTokenIsValid() {
+        //given
+        User user = User.createUser("userId", "passwordTest", "nickname").getUser();
+        userRepository.save(user);
+
+        //when
+        UserProfileResponse profile = userService.getProfile(user.getId());
+
+        //then
+        assertThat(profile.getUserId()).isEqualTo(user.getUserId());
+        assertThat(profile.getNickname()).isEqualTo(user.getNickname());
+        assertThat(profile.getStatus()).isEqualTo(UserStatus.ACTIVE);
+    }
+
+    @DisplayName("유저 정보 조회시 해당 유저가 존재하지 않으면 예외를 반환한다.")
+    @Test
+    void shouldThrowException_whenUserNotFound() {
+        //when, then
+        assertThatThrownBy(()->userService.getProfile(UUID.randomUUID()))
+                .isInstanceOf(UserNotFoundException.class)
+                .hasMessage("유저를 찾을 수 없습니다.");
+    }
+
+    @DisplayName("유저 정보 조회시 해당 유저가 이미 탈퇴한 유저라면 예외를 반환한다.")
+    @Test
+    void shouldThrowException_whenWithdrawnUserTriesToGetProfile() {
+        //given
+        User user = User.builder()
+                .id(UUID.randomUUID())
+                .userId("userId")
+                .password("passwordd")
+                .nickname("nickname")
+                .status(UserStatus.WITHDRAWN)
+                .build();
+        userRepository.save(user);
+
+        //when, then
+        assertThatThrownBy(()->userService.getProfile(UUID.randomUUID()))
+                .isInstanceOf(UserNotFoundException.class)
+                .hasMessage("유저를 찾을 수 없습니다.");
+    }
+
+    @DisplayName("유저 정보 조회시 해당 유저가 이미 삭제된 유저라면 예외를 반환한다.")
+    @Test
+    void shouldThrowException_whenDeletedUserTriesToGetProfile() {
+        //given
+        User user = User.builder()
+                .id(UUID.randomUUID())
+                .userId("userId")
+                .password("passwordd")
+                .nickname("nickname")
+                .status(UserStatus.DELETED)
+                .build();
+        userRepository.save(user);
+
+        //when, then
+        assertThatThrownBy(()->userService.getProfile(UUID.randomUUID()))
+                .isInstanceOf(UserNotFoundException.class)
+                .hasMessage("유저를 찾을 수 없습니다.");
+    }
+
+    @DisplayName("유저 정보 조회시 해당 유저가 이미 정지된 유저라면 예외를 반환한다.")
+    @Test
+    void shouldThrowException_whenSuspendedUserTriesToGetProfile() {
+        //given
+        User user = User.builder()
+                .id(UUID.randomUUID())
+                .userId("userId")
+                .password("passwordd")
+                .nickname("nickname")
+                .status(UserStatus.SUSPENDED)
+                .build();
+        userRepository.save(user);
+
+        //when, then
+        assertThatThrownBy(()->userService.getProfile(UUID.randomUUID()))
+                .isInstanceOf(UserNotFoundException.class)
+                .hasMessage("유저를 찾을 수 없습니다.");
+    }
+
+    @DisplayName("유저 정보 조회시 해당 유저가 이미 차단된 유저라면 예외를 반환한다.")
+    @Test
+    void shouldThrowException_whenBlockedUserTriesToGetProfile() {
+        //given
+        User user = User.builder()
+                .id(UUID.randomUUID())
+                .userId("userId")
+                .password("passwordd")
+                .nickname("nickname")
+                .status(UserStatus.BLOCKED)
+                .build();
+        userRepository.save(user);
+
+        //when, then
+        assertThatThrownBy(()->userService.getProfile(UUID.randomUUID()))
+                .isInstanceOf(UserNotFoundException.class)
+                .hasMessage("유저를 찾을 수 없습니다.");
+    }
+
+    @DisplayName("유저 탈퇴에 성공한다.")
+    @Test
+    void shouldWithdrawUserSuccessfully() throws Exception {
+        //given
+        User user = User.createUser("userId", "passwordTest", "nickname").getUser();
+        userRepository.save(user);
+
+        assertThat(user.getStatus()).isEqualTo(UserStatus.ACTIVE);
+
+        //when
+        userService.withDrawUser(user.getId());
+
+        //then
+        Optional<User> afterUser = userRepository.findById(user.getId());
+
+        assertThat(afterUser).isPresent();
+        assertThat(afterUser.get().getStatus()).isEqualTo(UserStatus.WITHDRAWN);
+    }
+
+    @DisplayName("유저 탈퇴시 해당 유저가 존재하지 않으면 예외를 반환한다.")
+    @Test
+    void shouldThrowException_whenWithdrawingNonExistentUser() {
+        //when, then
+        assertThatThrownBy(()->userService.withDrawUser(UUID.randomUUID()))
+                .isInstanceOf(UserNotFoundException.class)
+                .hasMessage("유저를 찾을 수 없습니다.");
+    }
+
+    @DisplayName("유저 정보가 성공적으로 업데이트된다.")
+    @Test
+    void shouldUpdateUserInfoSuccessfully() {
+        //given
+        User user = User.createUser("userId", "passwordd", "nickname").getUser();
+        userRepository.save(user);
+
+        UpdateUserApplicationRequest request = UpdateUserApplicationRequest.builder()
+                .nickname("업데이트 할 닉네임")
+                .build();
+
+        Optional<User> beforeUser = userRepository.findById(user.getId());
+        assertThat(beforeUser).isPresent();
+        assertThat(beforeUser.get().getNickname()).isEqualTo(user.getNickname());
+        assertThat(beforeUser.get().getNickname()).isNotEqualTo(request.getNickname());
+
+        //when
+        UserProfileResponse updateUser = userService.updateUser(user.getId(), request);
+
+        //then
+        Optional<User> afterUser = userRepository.findById(user.getId());
+        assertThat(afterUser).isPresent();
+        assertThat(afterUser.get().getNickname()).isNotEqualTo(user.getNickname());
+        assertThat(afterUser.get().getNickname()).isEqualTo(request.getNickname());
+        assertThat(updateUser.getNickname()).isEqualTo(request.getNickname());
+        assertThat(updateUser.getNickname()).isEqualTo(afterUser.get().getNickname());
+    }
+
+    @DisplayName("해당 닉네임이 이미 존재하면 업데이트에 실패하고, 409를 반환한다.")
+    @Test
+    void shouldFailToUpdateNickname_whenNicknameAlreadyExists() {
+        //given
+        User already = User.createUser("userIdddd", "passwordd", "already").getUser();
+        userRepository.save(already);
+
+        User user = User.createUser("userId", "passwordd", "nickname").getUser();
+        userRepository.save(user);
+
+        UpdateUserApplicationRequest request = UpdateUserApplicationRequest.builder()
+                .nickname(already.getNickname())
+                .build();
+
+        //when, then
+        assertThatThrownBy(()->userService.updateUser(user.getId(), request))
+                .isInstanceOf(DuplicateKeyException.class)
+                .hasMessage("이미 존재하는 닉네임입니다.");
+    }
+
+}
