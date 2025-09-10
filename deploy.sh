@@ -1,6 +1,6 @@
 #!/bin/bash
 
-APP_DIR="/home/ec2-user/cicd"
+APP_DIR="/home/ubuntu/cicd"
 LOG_FILE="$APP_DIR/app.log"
 
 echo "Starting deployment..."

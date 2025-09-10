@@ -71,7 +71,6 @@ jobs:
           username: ubuntu
           host: ${{ secrets.HOST }}
           key: ${{ secrets.PRIVATE_KEY }}
-          script_stop: true
           script: |
             chmod +x /home/ubuntu/cicd/deploy.sh
             sh /home/ubuntu/cicd/deploy.sh
