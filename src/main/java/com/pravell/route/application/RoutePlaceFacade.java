@@ -5,6 +5,7 @@ import com.pravell.place.application.dto.PlaceDTO;
 import com.pravell.plan.application.PlanService;
 import com.pravell.plan.application.dto.PlanMemberDTO;
 import com.pravell.route.application.dto.request.SaveRoutePlaceApplicationRequest;
+import com.pravell.route.application.dto.request.UpdatePlaceApplicationRequest;
 import com.pravell.route.application.dto.response.RoutePlaceResponse;
 import com.pravell.route.domain.model.Place;
 import com.pravell.route.domain.model.PlanMember;
@@ -27,13 +28,15 @@ public class RoutePlaceFacade {
     private final PlaceService placeService;
     private final SaveRoutePlaceService saveRoutePlaceService;
     private final FindRoutePlaceService findRoutePlaceService;
+    private final UpdateRoutePlaceService updateRoutePlaceService;
+    private final RoutePlaceService routePlaceService;
 
     public RoutePlaceResponse savePlace(UUID userId, UUID routeId, SaveRoutePlaceApplicationRequest request) {
         userService.findUserById(userId);
 
         Route route = routeService.findById(routeId);
         planService.findPlan(route.getPlanId());
-        Place place = getPlace(request, route);
+        Place place = getPlace(request.getPinPlaceId(), route);
 
         List<PlanMember> planMembers = getPlanMembers(route.getPlanId());
 
@@ -79,6 +82,25 @@ public class RoutePlaceFacade {
                 .build();
     }
 
+    public RoutePlaceResponse updatePlace(UUID routeId, Long routePlaceId, UUID userId,
+                                          UpdatePlaceApplicationRequest request) {
+        userService.findUserById(userId);
+
+        Route route = routeService.findById(routeId);
+        planService.findPlan(route.getPlanId());
+        List<PlanMember> planMembers = getPlanMembers(route.getPlanId());
+        RoutePlace routePlace = routePlaceService.findRoutePlace(routePlaceId);
+
+        Place place = getPlace(request, route, routePlace);
+
+        return updateRoutePlaceService.update(routePlace, request, userId, planMembers, route.getPlanId(), place);
+    }
+
+    private Place getPlace(UpdatePlaceApplicationRequest request, Route route, RoutePlace routePlace) {
+        return request.getPinPlaceId() == null ?
+                getPlace(routePlace.getPinPlaceId(), route) : getPlace(request.getPinPlaceId(), route);
+    }
+
     private List<PlanMember> getPlanMembers(UUID planId) {
         List<PlanMemberDTO> planMembers = planService.findPlanMembers(planId);
 
@@ -92,10 +114,11 @@ public class RoutePlaceFacade {
         ).toList();
     }
 
-    private Place getPlace(SaveRoutePlaceApplicationRequest request, Route route) {
-        PlaceDTO placeDto = placeService.findPlaceByPlaceIdAndPlanId(request.getPinPlaceId(), route.getPlanId());
+    private Place getPlace(Long pinPlaceId, Route route) {
+        PlaceDTO placeDto = placeService.findPlaceByPlaceIdAndPlanId(pinPlaceId, route.getPlanId());
 
         return Place.builder()
+                .pinPlaceId(placeDto.getPinPlaceId())
                 .title(placeDto.getTitle())
                 .address(placeDto.getAddress())
                 .roadAddress(placeDto.getRoadAddress())

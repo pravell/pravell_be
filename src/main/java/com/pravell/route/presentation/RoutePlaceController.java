@@ -4,6 +4,7 @@ import com.pravell.common.util.CommonJwtUtil;
 import com.pravell.route.application.RoutePlaceFacade;
 import com.pravell.route.application.dto.response.RoutePlaceResponse;
 import com.pravell.route.presentation.request.SaveRoutePlaceRequest;
+import com.pravell.route.presentation.request.UpdatePlaceRequest;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -41,6 +43,16 @@ public class RoutePlaceController {
                                                                     @PathVariable UUID routeId) {
         UUID id = commonJwtUtil.getUserIdFromToken(header);
         return ResponseEntity.ok(routePlaceFacade.findPlaces(id, routeId));
+    }
+
+    @PatchMapping("/{routePlaceId}")
+    public ResponseEntity<RoutePlaceResponse> updateRoutePlace(@RequestHeader("authorization") String header,
+                                                               @PathVariable UUID routeId,
+                                                               @PathVariable Long routePlaceId,
+                                                               @RequestBody UpdatePlaceRequest updatePlaceRequest) {
+        UUID id = commonJwtUtil.getUserIdFromToken(header);
+        return ResponseEntity.ok(
+                routePlaceFacade.updatePlace(routeId, routePlaceId, id, updatePlaceRequest.toApplicationRequest()));
     }
 
 }

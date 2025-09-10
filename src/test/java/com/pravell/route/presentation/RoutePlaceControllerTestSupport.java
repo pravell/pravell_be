@@ -85,15 +85,20 @@ public abstract class RoutePlaceControllerTestSupport extends ControllerTestSupp
     }
 
     protected PinPlace getPinPlace(UUID planId) {
+        return getPinPlace(planId, "장소 이름", "장소 주소", "장소 도로명 주소", "12345667", "09876", "#123456");
+    }
+
+    protected PinPlace getPinPlace(UUID planId, String title, String address, String roadAddress, String mapx,
+                                   String mapy, String pinColor) {
         return PinPlace.builder()
                 .placeId("PlaceeeIDDdd")
                 .nickname("nicknameee")
-                .title("장소 이름")
-                .address("장소 주소")
-                .roadAddress("장소 도로명 주소")
-                .mapx("12345667")
-                .mapy("345678")
-                .pinColor("#123455")
+                .title(title)
+                .address(address)
+                .roadAddress(roadAddress)
+                .mapx(mapx)
+                .mapy(mapy)
+                .pinColor(pinColor)
                 .planId(planId)
                 .savedUser(UUID.randomUUID())
                 .lastRefreshedAt(LocalDateTime.now())

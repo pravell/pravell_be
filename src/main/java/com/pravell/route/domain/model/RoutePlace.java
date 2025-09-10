@@ -53,6 +53,28 @@ public class RoutePlace extends BaseEntity {
                 .build();
     }
 
+    public void updatePinPlaceId(Long pinPlaceId) {
+        this.pinPlaceId = pinPlaceId;
+    }
+
+    public void updateDescription(String description) {
+        validateDescription(description);
+        this.description = description;
+    }
+
+    public void updateNickname(String nickname) {
+        validateNickname(nickname);
+        this.nickname = nickname;
+    }
+
+    public void updateSequence(Long sequence) {
+        this.sequence = sequence;
+    }
+
+    public void updateDate(LocalDate date) {
+        this.date = date;
+    }
+
     private static void validateDescription(String description) {
         if (description != null && (description.length() < 2 || description.length() > 50)) {
             throw new IllegalArgumentException("장소 메모는 2 ~ 50자여야 합니다.");
@@ -64,5 +86,4 @@ public class RoutePlace extends BaseEntity {
             throw new IllegalArgumentException("장소 별명은 2 ~ 20자여야 합니다.");
         }
     }
-
 }
