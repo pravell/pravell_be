@@ -6,7 +6,7 @@ LOG_FILE="$APP_DIR/app.log"
 echo "Starting deployment..."
 
 # 1. JAR 파일 선택 (가장 최신 파일)
-JAR_NAME=$(ls -t $APP_DIR/*.jar 2>/dev/null | head -n 1)
+JAR_NAME=$(ls -t $APP_DIR/*.jar | grep -v 'plain' | head -n 1)
 
 if [ -z "$JAR_NAME" ]; then
   echo "No jar file found in $APP_DIR"
