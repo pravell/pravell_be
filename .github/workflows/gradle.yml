@@ -1,6 +1,8 @@
 name: Develop Branch CI Pipeline
 
 on:
+  push:
+    branches: [ "main" ]
   pull_request:
     branches: [ "develop", "main" ]
 
@@ -42,7 +44,7 @@ jobs:
       - name: Create application-test.yml from GitHub Secret
         run: |
           mkdir -p src/test/resources
-          echo "${{ secrets.APPLICATION_TEST_YML }}" > src/main/resources/application-test.yml
+          echo "${{ secrets.APPLICATION_TEST_YML }}" > src/test/resources/application-test.yml
 
       - name: Build with Gradle Wrapper
         run: ./gradlew build
