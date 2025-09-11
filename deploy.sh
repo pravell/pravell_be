@@ -16,14 +16,14 @@ fi
 echo "📦 Found jar: $JAR_NAME"
 
 # 2. 기존 애플리케이션 종료
-PID=$(pgrep -f "$JAR_NAME")
+EXISTING_PID=$(lsof -ti tcp:8080)
 
-if [ -n "$PID" ]; then
-  echo "Stopping running app (PID: $PID)..."
-  kill "$PID"
+if [ -n "$EXISTING_PID" ]; then
+  echo "Stopping process using port 8080 (PID: $EXISTING_PID)..."
+  kill -9 "$EXISTING_PID"
   sleep 3
 else
-  echo "No running app to stop."
+  echo "No process is using port 8080."
 fi
 
 # 3. 권한 설정
