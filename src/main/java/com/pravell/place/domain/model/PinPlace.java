@@ -43,7 +43,7 @@ public class PinPlace extends AggregateRoot {
     private String description;
 
     @Lob
-    @Column
+    @Column(columnDefinition = "TEXT")
     private String hours;
 
     @Column(precision = 10, scale = 7)
