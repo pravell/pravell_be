@@ -23,5 +23,6 @@ public class PlaceResponse {
     private String pinColor;
     private UUID planId;
     private String description;
+    private String mapUrl;
 
 }
