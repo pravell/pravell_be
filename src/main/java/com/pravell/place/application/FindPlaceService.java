@@ -112,7 +112,7 @@ public class FindPlaceService {
         return hoursList;
     }
 
-    private static PlaceResponse buildPlaceResponse(PinPlace place, List<String> hoursList) {
+    private PlaceResponse buildPlaceResponse(PinPlace place, List<String> hoursList) {
         return PlaceResponse.builder()
                 .id(place.getId())
                 .nickname(place.getNickname())
@@ -127,6 +127,7 @@ public class FindPlaceService {
                 .pinColor(place.getPinColor())
                 .planId(place.getPlanId())
                 .description(place.getDescription())
+                .mapUrl(mapUrl + place.getTitle())
                 .build();
     }
 }

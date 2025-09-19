@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
@@ -31,6 +32,9 @@ class PlaceControllerFindTest extends PlaceControllerTestSupport {
         planUsersRepository.deleteAllInBatch();
         pinPlaceRepository.deleteAllInBatch();
     }
+
+    @Value("${naver.map.url}")
+    private String mapUrl;
 
     @DisplayName("장소가 저장된 플랜이 PUBLIC이고, OWNER, MEMBER, 비참여자일 경우 장소 상세 조회에 성공한다.")
     @ParameterizedTest(name = "[{index}] 권한: {0}")
@@ -65,7 +69,8 @@ class PlaceControllerFindTest extends PlaceControllerTestSupport {
                 .andExpect(jsonPath("$.description").value(pinPlace.getDescription()))
                 .andExpect(jsonPath("$.pinColor").value(pinPlace.getPinColor()))
                 .andExpect(jsonPath("$.hours[0]").value("Monday: 10:00 AM – 9:00 PM"))
-                .andExpect(jsonPath("$.hours[1]").value("Tuesday: 10:00 AM – 9:00 PM"));
+                .andExpect(jsonPath("$.hours[1]").value("Tuesday: 10:00 AM – 9:00 PM"))
+                .andExpect(jsonPath("$.mapUrl").value(mapUrl+pinPlace.getTitle()));
     }
 
     private static Stream<Arguments> provideAccessStatusesForPublicPlanPlaceDetailAccess() {
@@ -140,7 +145,8 @@ class PlaceControllerFindTest extends PlaceControllerTestSupport {
                 .andExpect(jsonPath("$.description").value(pinPlace.getDescription()))
                 .andExpect(jsonPath("$.pinColor").value(pinPlace.getPinColor()))
                 .andExpect(jsonPath("$.hours[0]").value("Monday: 10:00 AM – 9:00 PM"))
-                .andExpect(jsonPath("$.hours[1]").value("Tuesday: 10:00 AM – 9:00 PM"));
+                .andExpect(jsonPath("$.hours[1]").value("Tuesday: 10:00 AM – 9:00 PM"))
+                .andExpect(jsonPath("$.mapUrl").value(mapUrl+pinPlace.getTitle()));
     }
 
     private static Stream<Arguments> providePrivatePlanAccessStatusesForPlaceDetail() {
