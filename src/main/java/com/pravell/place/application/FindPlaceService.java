@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -26,6 +27,9 @@ public class FindPlaceService {
 
     private final PinPlaceRepository pinPlaceRepository;
     private final ObjectMapper objectMapper;
+
+    @Value("${naver.map.url}")
+    private String mapUrl;
 
     @Transactional(readOnly = true)
     public List<FindPlanPlacesResponse> findAll(UUID userId, UUID planId, List<PlanMember> planMembers,
@@ -60,6 +64,7 @@ public class FindPlaceService {
                     .address(pp.getAddress())
                     .roadAddress(pp.getRoadAddress())
                     .hours(hours)
+                    .mapUrl(mapUrl + pp.getTitle().replaceAll("\\s+", ""))
                     .build();
         }).toList();
     }
@@ -107,7 +112,7 @@ public class FindPlaceService {
         return hoursList;
     }
 
-    private static PlaceResponse buildPlaceResponse(PinPlace place, List<String> hoursList) {
+    private PlaceResponse buildPlaceResponse(PinPlace place, List<String> hoursList) {
         return PlaceResponse.builder()
                 .id(place.getId())
                 .nickname(place.getNickname())
@@ -122,6 +127,7 @@ public class FindPlaceService {
                 .pinColor(place.getPinColor())
                 .planId(place.getPlanId())
                 .description(place.getDescription())
+                .mapUrl(mapUrl + place.getTitle())
                 .build();
     }
 }

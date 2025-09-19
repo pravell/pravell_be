@@ -20,5 +20,6 @@ public class FindPlanPlacesResponse {
     private String address;
     private String roadAddress;
     private List<String> hours;
+    private String mapUrl;
 
 }
