@@ -133,6 +133,7 @@ class PlanControllerFindTest extends ControllerTestSupport {
                 .andExpect(jsonPath("$.ownerNickname").value(owner.getNickname()))
                 .andExpect(jsonPath("$.startDate").value(LocalDate.parse("2025-09-29").toString()))
                 .andExpect(jsonPath("$.endDate").value(LocalDate.parse("2025-09-30").toString()))
+                .andExpect(jsonPath("$.isOwner").value(true))
                 .andReturn();
 
         String content = mvcResult.getResponse().getContentAsString();
@@ -171,6 +172,7 @@ class PlanControllerFindTest extends ControllerTestSupport {
                 .andExpect(jsonPath("$.ownerNickname").value(owner.getNickname()))
                 .andExpect(jsonPath("$.startDate").value(LocalDate.parse("2025-09-29").toString()))
                 .andExpect(jsonPath("$.endDate").value(LocalDate.parse("2025-09-30").toString()))
+                .andExpect(jsonPath("$.isOwner").value(false))
                 .andReturn();
 
         String content = mvcResult.getResponse().getContentAsString();
@@ -369,6 +371,7 @@ class PlanControllerFindTest extends ControllerTestSupport {
                 .andExpect(jsonPath("$.ownerNickname").value(owner.getNickname()))
                 .andExpect(jsonPath("$.startDate").value(LocalDate.parse("2025-09-29").toString()))
                 .andExpect(jsonPath("$.endDate").value(LocalDate.parse("2025-09-30").toString()))
+                .andExpect(jsonPath("$.isOwner").value(false))
                 .andReturn();
 
         String content = mvcResult.getResponse().getContentAsString();
@@ -407,6 +410,7 @@ class PlanControllerFindTest extends ControllerTestSupport {
                 .andExpect(jsonPath("$.ownerNickname").value(owner.getNickname()))
                 .andExpect(jsonPath("$.startDate").value(LocalDate.parse("2025-09-29").toString()))
                 .andExpect(jsonPath("$.endDate").value(LocalDate.parse("2025-09-30").toString()))
+                .andExpect(jsonPath("$.isOwner").value(false))
                 .andReturn();
 
         String content = mvcResult.getResponse().getContentAsString();
@@ -490,6 +494,7 @@ class PlanControllerFindTest extends ControllerTestSupport {
                 .andExpect(jsonPath("$.isPublic").value("true"))
                 .andExpect(jsonPath("$.ownerId").value(owner.getId().toString()))
                 .andExpect(jsonPath("$.ownerNickname").value(owner.getNickname()))
+                .andExpect(jsonPath("$.isOwner").value(false))
                 .andReturn();
 
         String content = mvcResult.getResponse().getContentAsString();

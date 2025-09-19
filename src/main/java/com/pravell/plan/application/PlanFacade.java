@@ -92,11 +92,11 @@ public class PlanFacade {
         UUID ownerId = extractOwnerId(planUsers);
         Pair<String, List<Member>> ownerAndMembers = separateOwnerAndMembers(ownerId, userMembers);
 
-        return buildFindPlanResponse(plan, ownerId, ownerAndMembers);
+        return buildFindPlanResponse(plan, ownerId, ownerAndMembers, userId);
     }
 
-    private static FindPlanResponse buildFindPlanResponse(Plan plan, UUID ownerId,
-                                                        Pair<String, List<Member>> ownerAndMembers) {
+    private FindPlanResponse buildFindPlanResponse(Plan plan, UUID ownerId,
+                                                          Pair<String, List<Member>> ownerAndMembers, UUID userId) {
         return FindPlanResponse.builder()
                 .planId(plan.getId())
                 .name(plan.getName())
@@ -107,6 +107,7 @@ public class PlanFacade {
                 .member(ownerAndMembers.getSecond())
                 .startDate(plan.getStartDate())
                 .endDate(plan.getEndDate())
+                .isOwner(ownerId.equals(userId))
                 .build();
     }
 
@@ -175,10 +176,10 @@ public class PlanFacade {
         return Pair.of(ownerNickname, members);
     }
 
-    private List<Member> getMembers(List<UUID> memberId){
+    private List<Member> getMembers(List<UUID> memberId) {
         List<UserMemberDTO> userMembers = userService.findMembers(memberId);
 
-        return userMembers.stream().map(um->{
+        return userMembers.stream().map(um -> {
             return Member.builder()
                     .nickname(um.getNickname())
                     .memberId(um.getMemberId())
