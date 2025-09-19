@@ -15,14 +15,21 @@ public class FindPlanResponse {
 
     private UUID planId;
     private String name;
-    @JsonProperty("isPublic")
-    private boolean isPublic;
     private LocalDateTime createdAt;
     private UUID ownerId;
     private String ownerNickname;
     private List<Member> member;
     private LocalDate startDate;
     private LocalDate endDate;
+
+    @JsonProperty("isPublic")
+    private boolean isPublic;
+
+    @JsonProperty("isOwner")
+    private boolean isOwner;
+
+    @JsonProperty("isMember")
+    private boolean isMember;
 
 }
 
