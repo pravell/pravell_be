@@ -25,12 +25,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.util.StringUtils;
 
 class PlaceControllerFindAllTest extends PlaceControllerTestSupport {
+
+    @Value("${naver.map.url}")
+    private String mapUrl;
 
     @AfterEach
     void tearDown() {
@@ -80,16 +84,19 @@ class PlaceControllerFindAllTest extends PlaceControllerTestSupport {
 
         //then
         assertThat(responseList).hasSize(3)
-                .extracting("title", "mapx", "mapy", "pinColor", "address", "roadAddress", "hours")
+                .extracting("title", "mapx", "mapy", "pinColor", "address", "roadAddress", "hours", "mapUrl")
                 .containsExactlyInAnyOrder(
                         tuple(pinPlace1.getTitle(), pinPlace1.getMapx(), pinPlace1.getMapy(), pinPlace1.getPinColor(),
-                                pinPlace1.getAddress(), pinPlace1.getRoadAddress(), parseHours(pinPlace1.getHours())),
+                                pinPlace1.getAddress(), pinPlace1.getRoadAddress(), parseHours(pinPlace1.getHours()),
+                                mapUrl + pinPlace1.getTitle()),
 
                         tuple(pinPlace2.getTitle(), pinPlace2.getMapx(), pinPlace2.getMapy(), pinPlace2.getPinColor(),
-                                pinPlace2.getAddress(), pinPlace2.getRoadAddress(), parseHours(pinPlace2.getHours())),
+                                pinPlace2.getAddress(), pinPlace2.getRoadAddress(), parseHours(pinPlace2.getHours()),
+                                mapUrl + pinPlace2.getTitle()),
 
                         tuple(pinPlace3.getTitle(), pinPlace3.getMapx(), pinPlace3.getMapy(), pinPlace3.getPinColor(),
-                                pinPlace3.getAddress(), pinPlace3.getRoadAddress(), parseHours(pinPlace3.getHours()))
+                                pinPlace3.getAddress(), pinPlace3.getRoadAddress(), parseHours(pinPlace3.getHours()),
+                                mapUrl + pinPlace3.getTitle())
                 );
     }
 
@@ -188,16 +195,19 @@ class PlaceControllerFindAllTest extends PlaceControllerTestSupport {
 
         //then
         assertThat(responseList).hasSize(3)
-                .extracting("title", "mapx", "mapy", "pinColor", "address", "roadAddress", "hours")
+                .extracting("title", "mapx", "mapy", "pinColor", "address", "roadAddress", "hours", "mapUrl")
                 .containsExactlyInAnyOrder(
                         tuple(pinPlace1.getTitle(), pinPlace1.getMapx(), pinPlace1.getMapy(), pinPlace1.getPinColor(),
-                                pinPlace1.getAddress(), pinPlace1.getRoadAddress(), parseHours(pinPlace1.getHours())),
+                                pinPlace1.getAddress(), pinPlace1.getRoadAddress(), parseHours(pinPlace1.getHours()),
+                                mapUrl + pinPlace1.getTitle()),
 
                         tuple(pinPlace2.getTitle(), pinPlace2.getMapx(), pinPlace2.getMapy(), pinPlace2.getPinColor(),
-                                pinPlace2.getAddress(), pinPlace2.getRoadAddress(), parseHours(pinPlace2.getHours())),
+                                pinPlace2.getAddress(), pinPlace2.getRoadAddress(), parseHours(pinPlace2.getHours()),
+                                mapUrl + pinPlace2.getTitle()),
 
                         tuple(pinPlace3.getTitle(), pinPlace3.getMapx(), pinPlace3.getMapy(), pinPlace3.getPinColor(),
-                                pinPlace3.getAddress(), pinPlace3.getRoadAddress(), parseHours(pinPlace3.getHours()))
+                                pinPlace3.getAddress(), pinPlace3.getRoadAddress(), parseHours(pinPlace3.getHours()),
+                                mapUrl + pinPlace3.getTitle())
                 );
     }
 
