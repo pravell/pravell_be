@@ -97,6 +97,11 @@ public class PlanFacade {
 
     private FindPlanResponse buildFindPlanResponse(Plan plan, UUID ownerId,
                                                           Pair<String, List<Member>> ownerAndMembers, UUID userId) {
+        List<Member> members = ownerAndMembers.getSecond();
+        boolean isMember = members.stream()
+                .map(Member::getMemberId)
+                .anyMatch(userId::equals);
+
         return FindPlanResponse.builder()
                 .planId(plan.getId())
                 .name(plan.getName())
@@ -108,6 +113,7 @@ public class PlanFacade {
                 .startDate(plan.getStartDate())
                 .endDate(plan.getEndDate())
                 .isOwner(ownerId.equals(userId))
+                .isMember(isMember)
                 .build();
     }
 

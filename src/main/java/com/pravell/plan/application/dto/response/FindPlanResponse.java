@@ -28,5 +28,8 @@ public class FindPlanResponse {
     @JsonProperty("isOwner")
     private boolean isOwner;
 
+    @JsonProperty("isMember")
+    private boolean isMember;
+
 }
 
