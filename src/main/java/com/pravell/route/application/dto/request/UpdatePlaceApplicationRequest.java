@@ -3,9 +3,11 @@ package com.pravell.route.application.dto.request;
 import java.time.LocalDate;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.ToString;
 
 @Getter
 @Builder
+@ToString
 public class UpdatePlaceApplicationRequest {
 
     private Long pinPlaceId;

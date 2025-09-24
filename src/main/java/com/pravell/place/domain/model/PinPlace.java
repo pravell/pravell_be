@@ -16,6 +16,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @Table(name = "pin_places")
@@ -23,6 +24,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
+@ToString
 public class PinPlace extends AggregateRoot {
 
     @Id
@@ -51,28 +53,6 @@ public class PinPlace extends AggregateRoot {
 
     @Column(precision = 10, scale = 7)
     private BigDecimal longitude;
-
-    @Override
-    public String toString() {
-        return "PinPlace{" +
-                "id=" + id +
-                ", placeId='" + placeId + '\'' +
-                ", nickname='" + nickname + '\'' +
-                ", title='" + title + '\'' +
-                ", address='" + address + '\'' +
-                ", roadAddress='" + roadAddress + '\'' +
-                ", mapx='" + mapx + '\'' +
-                ", mapy='" + mapy + '\'' +
-                ", pinColor='" + pinColor + '\'' +
-                ", planId=" + planId +
-                ", savedUser=" + savedUser +
-                ", lastRefreshedAt=" + lastRefreshedAt +
-                ", description='" + description + '\'' +
-                ", hours='" + hours + '\'' +
-                ", latitude=" + latitude +
-                ", longitude=" + longitude +
-                '}';
-    }
 
     public void updateNickname(String nickname) {
         if (nickname.length() < 2 || nickname.length() > 30) {
