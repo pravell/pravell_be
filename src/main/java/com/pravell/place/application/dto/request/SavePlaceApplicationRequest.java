@@ -5,9 +5,11 @@ import java.util.List;
 import java.util.UUID;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.ToString;
 
 @Builder
 @Getter
+@ToString
 public class SavePlaceApplicationRequest {
 
     private String placeId;
