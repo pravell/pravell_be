@@ -53,7 +53,7 @@ public class UpdateRoutePlaceService {
         if (request.getSequence() != null && !request.getSequence().equals(routePlace.getSequence())) {
             routePlace.updateSequence(request.getSequence());
         }
-        if (request.getDescription() != null && !request.getDate().equals(routePlace.getDate())) {
+        if (request.getDate() != null && !request.getDate().equals(routePlace.getDate())) {
             routePlace.updateDate(request.getDate());
         }
     }
