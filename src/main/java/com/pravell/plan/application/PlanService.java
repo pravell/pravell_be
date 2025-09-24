@@ -54,6 +54,19 @@ public class PlanService {
     }
 
     @Transactional(readOnly = true)
+    public List<PlanMemberDTO> findActivePlanMembers(UUID planId) {
+        List<PlanUsers> planUsers = planUsersRepository.findAllByPlanId(planId);
+
+        return planUsers.stream().filter(pu -> pu.getPlanUserStatus().equals(PlanUserStatus.MEMBER) ||
+                        pu.getPlanUserStatus().equals(PlanUserStatus.OWNER))
+                .map(p -> {
+                    return PlanMemberDTO.builder()
+                            .memberId(p.getUserId())
+                            .build();
+                }).toList();
+    }
+
+    @Transactional(readOnly = true)
     public boolean isPlanPublic(UUID planId) {
         Optional<Plan> plan = planRepository.findById(planId);
         if (plan.isEmpty() || plan.get().getIsDeleted() == true) {
