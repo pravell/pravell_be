@@ -63,13 +63,18 @@ public abstract class ExpenseControllerTestSupport extends ControllerTestSupport
                 .build();
     }
 
-    protected Expense getExpense(UUID planId, UUID createdBy, UUID paidByUserId){
+    protected Expense getExpense(String title, String description, UUID planId, UUID createdBy, UUID paidByUserId) {
+        return getExpense(title, description, planId, createdBy, paidByUserId, LocalDateTime.now());
+    }
+
+    protected Expense getExpense(String title, String description, UUID planId, UUID createdBy, UUID paidByUserId,
+                                 LocalDateTime spentAt) {
         return Expense.builder()
                 .id(UUID.randomUUID())
-                .title("title")
-                .description("description")
+                .title(title)
+                .description(description)
                 .amount(10000L)
-                .spentAt(LocalDateTime.now())
+                .spentAt(spentAt)
                 .planId(planId)
                 .createdBy(createdBy)
                 .paidByUserId(paidByUserId)

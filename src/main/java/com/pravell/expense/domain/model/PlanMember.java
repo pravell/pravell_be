@@ -10,4 +10,5 @@ import lombok.ToString;
 @ToString
 public class PlanMember {
     private UUID memberId;
+    private String nickname;
 }
