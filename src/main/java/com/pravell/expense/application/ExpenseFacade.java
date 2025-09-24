@@ -2,6 +2,7 @@ package com.pravell.expense.application;
 
 import com.pravell.expense.application.dto.request.CreateExpenseApplicationRequest;
 import com.pravell.expense.application.dto.response.ExpenseResponse;
+import com.pravell.expense.domain.model.Expense;
 import com.pravell.expense.domain.model.PlanMember;
 import com.pravell.plan.application.PlanService;
 import com.pravell.plan.application.dto.PlanMemberDTO;
@@ -21,6 +22,8 @@ public class ExpenseFacade {
     private final PlanService planService;
     private final CreateExpenseService createExpenseService;
     private final FindExpenseService findExpenseService;
+    private final ExpenseService expenseService;
+    private final DeleteExpenseService deleteExpenseService;
 
     public UUID createExpense(UUID userId, UUID planId, CreateExpenseApplicationRequest request) {
         userService.findUserById(userId);
@@ -40,6 +43,15 @@ public class ExpenseFacade {
         List<PlanMember> members = getMembers(planId);
 
         return findExpenseService.findAll(planId, userId, members, from, to, paidByUserId);
+    }
+
+    public void deleteExpense(UUID userId, UUID expenseId) {
+        userService.findUserById(userId);
+
+        Expense expense = expenseService.findExpense(expenseId);
+        List<PlanMember> planMembers = getPlanMembers(expense.getPlanId());
+
+        deleteExpenseService.delete(expense, userId, planMembers);
     }
 
     private List<PlanMember> getMembers(UUID planId) {

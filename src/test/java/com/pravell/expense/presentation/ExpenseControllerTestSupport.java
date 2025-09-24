@@ -63,6 +63,24 @@ public abstract class ExpenseControllerTestSupport extends ControllerTestSupport
                 .build();
     }
 
+    protected Expense getExpense(UUID planId, UUID createdBy, UUID paidByUserId, boolean isDeleted) {
+        return Expense.builder()
+                .id(UUID.randomUUID())
+                .title("title")
+                .description("description")
+                .amount(10000L)
+                .spentAt(LocalDateTime.now())
+                .planId(planId)
+                .createdBy(createdBy)
+                .paidByUserId(paidByUserId)
+                .isDeleted(isDeleted)
+                .build();
+    }
+
+    protected Expense getExpense(UUID planId, UUID createdBy, UUID paidByUserId) {
+        return getExpense("title", "description", planId, createdBy, paidByUserId, LocalDateTime.now());
+    }
+
     protected Expense getExpense(String title, String description, UUID planId, UUID createdBy, UUID paidByUserId) {
         return getExpense(title, description, planId, createdBy, paidByUserId, LocalDateTime.now());
     }
@@ -78,6 +96,7 @@ public abstract class ExpenseControllerTestSupport extends ControllerTestSupport
                 .planId(planId)
                 .createdBy(createdBy)
                 .paidByUserId(paidByUserId)
+                .isDeleted(false)
                 .build();
     }
 

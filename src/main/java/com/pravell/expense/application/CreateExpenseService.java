@@ -16,12 +16,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-@Transactional
 public class CreateExpenseService {
 
     private final ExpenseAuthorizationService expenseAuthorizationService;
     private final ExpenseRepository expenseRepository;
 
+    @Transactional
     public UUID create(UUID userId, UUID planId, CreateExpenseApplicationRequest request,
                        List<PlanMember> planMembers) {
         validateCreateExpense(userId, planMembers);

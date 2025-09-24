@@ -17,12 +17,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class FindExpenseService {
 
     private final ExpenseRepository expenseRepository;
     private final ExpenseAuthorizationService expenseAuthorizationService;
 
+    @Transactional(readOnly = true)
     public List<ExpenseResponse> findAll(UUID planId, UUID userId, List<PlanMember> planMembers,
                                          LocalDateTime from, LocalDateTime to, UUID paidByUserId) {
         validateFindExpenses(userId, planMembers);

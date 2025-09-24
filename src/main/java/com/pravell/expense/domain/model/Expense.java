@@ -74,6 +74,10 @@ public class Expense extends AggregateRoot {
                 .build();
     }
 
+    public void delete() {
+        this.isDeleted = true;
+    }
+
     private static void validateCreateExpense(UUID planId, UUID paidByUserId, Long amount, LocalDateTime spentAt,
                                               UUID userId, String title, String description) {
         if (planId == null) {
@@ -112,5 +116,4 @@ public class Expense extends AggregateRoot {
             throw new IllegalArgumentException("설명은 255자까지 가능합니다.");
         }
     }
-
 }

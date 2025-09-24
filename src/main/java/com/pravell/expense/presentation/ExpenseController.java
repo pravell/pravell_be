@@ -12,6 +12,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -71,6 +72,14 @@ public class ExpenseController {
             return null;
         }
         return UUID.fromString(s);
+    }
+
+    @DeleteMapping("/expenses/{expenseId}")
+    public ResponseEntity<Void> deleteExpense(@RequestHeader("Authorization") String header,
+                                              @PathVariable UUID expenseId){
+        UUID userId = commonJwtUtil.getUserIdFromToken(header);
+        expenseFacade.deleteExpense(userId, expenseId);
+        return ResponseEntity.noContent().build();
     }
 
 }
