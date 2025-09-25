@@ -9,6 +9,7 @@ import lombok.Getter;
 @Builder
 public class ExpenseResponse {
 
+    private UUID expenseId;
     private String title;
     private Long amount;
     private UUID paidByUserId;

@@ -52,6 +52,7 @@ public class FindExpenseService {
 
         return expenses.stream()
                 .map(e -> ExpenseResponse.builder()
+                        .expenseId(e.getId())
                         .title(e.getTitle())
                         .amount(e.getAmount())
                         .paidByUserId(e.getPaidByUserId())
@@ -67,6 +68,7 @@ public class FindExpenseService {
         Map<UUID, String> idToNickname = getUuidStringMap(planMembers);
 
         return ExpenseResponse.builder()
+                .expenseId(expense.getId())
                 .title(expense.getTitle())
                 .amount(expense.getAmount())
                 .paidByUserId(expense.getPaidByUserId())
