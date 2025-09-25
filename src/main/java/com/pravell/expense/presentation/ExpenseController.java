@@ -4,6 +4,7 @@ import com.pravell.common.util.CommonJwtUtil;
 import com.pravell.expense.application.ExpenseFacade;
 import com.pravell.expense.application.dto.response.ExpenseResponse;
 import com.pravell.expense.presentation.request.CreateExpenseRequest;
+import com.pravell.expense.presentation.request.UpdateExpenseRequest;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.time.LocalDateTime;
@@ -14,6 +15,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -76,7 +78,7 @@ public class ExpenseController {
 
     @DeleteMapping("/expenses/{expenseId}")
     public ResponseEntity<Void> deleteExpense(@RequestHeader("Authorization") String header,
-                                              @PathVariable UUID expenseId){
+                                              @PathVariable UUID expenseId) {
         UUID userId = commonJwtUtil.getUserIdFromToken(header);
         expenseFacade.deleteExpense(userId, expenseId);
         return ResponseEntity.noContent().build();
@@ -84,9 +86,18 @@ public class ExpenseController {
 
     @GetMapping("/expenses/{expenseId}")
     public ResponseEntity<ExpenseResponse> getExpense(@RequestHeader("Authorization") String header,
-                                                      @PathVariable UUID expenseId){
+                                                      @PathVariable UUID expenseId) {
         UUID userId = commonJwtUtil.getUserIdFromToken(header);
         return ResponseEntity.ok(expenseFacade.getExpense(userId, expenseId));
+    }
+
+    @PatchMapping("/expenses/{expenseId}")
+    public ResponseEntity<ExpenseResponse> updateExpense(@RequestHeader("Authorization") String header,
+                                                         @Valid @RequestBody UpdateExpenseRequest updateExpenseRequest,
+                                                         @PathVariable UUID expenseId) {
+        UUID userId = commonJwtUtil.getUserIdFromToken(header);
+        return ResponseEntity.ok(
+                expenseFacade.updateExpense(userId, expenseId, updateExpenseRequest.toApplicationRequest()));
     }
 
 }

@@ -15,6 +15,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -24,6 +25,14 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
 class ExpenseControllerFindTest extends ExpenseControllerTestSupport {
+
+    @AfterEach
+    void tearDown() {
+        userRepository.deleteAllInBatch();
+        planRepository.deleteAllInBatch();
+        planUsersRepository.deleteAllInBatch();
+        expenseRepository.deleteAllInBatch();
+    }
 
     @DisplayName("플랜의 멤버, 소유자는 지출 내역을 조회할 수 있다.")
     @ParameterizedTest(name = "[{index}] 권한 : {0}")

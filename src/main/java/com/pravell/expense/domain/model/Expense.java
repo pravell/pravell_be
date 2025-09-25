@@ -78,6 +78,29 @@ public class Expense extends AggregateRoot {
         this.isDeleted = true;
     }
 
+    public void updateTitle(String title) {
+        validateTitle(title);
+        this.title = title;
+    }
+
+    public void updateAmount(Long amount) {
+        validateAmount(amount);
+        this.amount = amount;
+    }
+
+    public void updatePaidByUserId(UUID paidByUserId) {
+        this.paidByUserId = paidByUserId;
+    }
+
+    public void updateSpentAt(LocalDateTime spentAt) {
+        this.spentAt = spentAt;
+    }
+
+    public void updateDescription(String description) {
+        validateDescription(description);
+        this.description = description;
+    }
+
     private static void validateCreateExpense(UUID planId, UUID paidByUserId, Long amount, LocalDateTime spentAt,
                                               UUID userId, String title, String description) {
         if (planId == null) {
@@ -89,15 +112,19 @@ public class Expense extends AggregateRoot {
         if (spentAt == null) {
             throw new IllegalArgumentException("spentAt은 필수입니다.");
         }
-        if (amount == null || amount < 0) {
-            throw new IllegalArgumentException("amount는 0 이상이어야 합니다.");
-        }
         if (userId == null) {
             throw new IllegalArgumentException("createdBy는 필수입니다.");
         }
 
+        validateAmount(amount);
         validateTitle(title);
         validateDescription(description);
+    }
+
+    private static void validateAmount(Long amount) {
+        if (amount == null || amount < 0) {
+            throw new IllegalArgumentException("amount는 0 이상이어야 합니다.");
+        }
     }
 
     private static void validateTitle(String title) {

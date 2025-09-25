@@ -1,6 +1,7 @@
 package com.pravell.expense.application;
 
 import com.pravell.expense.application.dto.request.CreateExpenseApplicationRequest;
+import com.pravell.expense.application.dto.request.UpdateExpenseApplicationRequest;
 import com.pravell.expense.application.dto.response.ExpenseResponse;
 import com.pravell.expense.domain.model.Expense;
 import com.pravell.expense.domain.model.PlanMember;
@@ -24,6 +25,7 @@ public class ExpenseFacade {
     private final FindExpenseService findExpenseService;
     private final ExpenseService expenseService;
     private final DeleteExpenseService deleteExpenseService;
+    private final UpdateExpenseService updateExpenseService;
 
     public UUID createExpense(UUID userId, UUID planId, CreateExpenseApplicationRequest request) {
         userService.findUserById(userId);
@@ -40,7 +42,7 @@ public class ExpenseFacade {
             userService.findUserById(paidByUserId);
         }
 
-        List<PlanMember> members = getMembers(planId);
+        List<PlanMember> members = getMemberIdAndNickname(planId);
 
         return findExpenseService.findAll(planId, userId, members, from, to, paidByUserId);
     }
@@ -49,7 +51,7 @@ public class ExpenseFacade {
         userService.findUserById(userId);
 
         Expense expense = expenseService.findExpense(expenseId);
-        List<PlanMember> members = getMembers(expense.getPlanId());
+        List<PlanMember> members = getMemberIdAndNickname(expense.getPlanId());
 
         return findExpenseService.find(expense, members, userId);
     }
@@ -58,12 +60,21 @@ public class ExpenseFacade {
         userService.findUserById(userId);
 
         Expense expense = expenseService.findExpense(expenseId);
-        List<PlanMember> planMembers = getPlanMembers(expense.getPlanId());
+        List<PlanMember> planMembers = getMemberId(expense.getPlanId());
 
         deleteExpenseService.delete(expense, userId, planMembers);
     }
 
-    private List<PlanMember> getMembers(UUID planId) {
+    public ExpenseResponse updateExpense(UUID userId, UUID expenseId, UpdateExpenseApplicationRequest request) {
+        userService.findUserById(userId);
+
+        Expense expense = expenseService.findExpense(expenseId);
+        List<PlanMember> members = getMemberIdAndNickname(expense.getPlanId());
+
+        return updateExpenseService.update(expense, request, userId, members);
+    }
+
+    private List<PlanMember> getMemberIdAndNickname(UUID planId) {
         List<PlanMember> planMembers = getPlanMember(planId);
         List<UserMemberDTO> userServiceMembers = userService.findMembers(
                 planMembers.stream().map(PlanMember::getMemberId).toList());
@@ -77,10 +88,10 @@ public class ExpenseFacade {
 
     private List<PlanMember> getPlanMember(UUID planId) {
         planService.findPlan(planId);
-        return getPlanMembers(planId);
+        return getMemberId(planId);
     }
 
-    private List<PlanMember> getPlanMembers(UUID planId) {
+    private List<PlanMember> getMemberId(UUID planId) {
         List<PlanMemberDTO> planMembers = planService.findActivePlanMembers(planId);
 
         return planMembers.stream().map(
