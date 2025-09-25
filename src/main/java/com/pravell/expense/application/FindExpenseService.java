@@ -12,11 +12,13 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class FindExpenseService {
 
     private final ExpenseRepository expenseRepository;
@@ -25,13 +27,15 @@ public class FindExpenseService {
     @Transactional(readOnly = true)
     public List<ExpenseResponse> findAll(UUID planId, UUID userId, List<PlanMember> planMembers,
                                          LocalDateTime from, LocalDateTime to, UUID paidByUserId) {
-        validateFindExpenses(userId, planMembers);
+        log.info("{} 유저가 {} 플랜의 지출 내역을 조회.", userId, planId);
+        validateFindExpenses(userId, planMembers, planId);
         List<Expense> expenses = expenseRepository.findAllByPlanIdWithFilters(planId, from, to, paidByUserId);
         return getExpenseResponses(expenses, planMembers);
     }
 
-    private void validateFindExpenses(UUID userId, List<PlanMember> planMembers) {
+    private void validateFindExpenses(UUID userId, List<PlanMember> planMembers, UUID planId) {
         if (!expenseAuthorizationService.isOwnerOrMember(userId, planMembers)) {
+            log.info("{} 유저는 {} 플랜의 지출을 조회하지 못합니다.", userId, planId);
             throw new AccessDeniedException("해당 리소스에 접근 할 권한이 없습니다.");
         }
     }

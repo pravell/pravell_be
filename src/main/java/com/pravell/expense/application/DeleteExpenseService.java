@@ -21,12 +21,13 @@ public class DeleteExpenseService {
     @Transactional
     public void delete(Expense expense, UUID userId, List<PlanMember> planMembers) {
         log.info("{} 유저가 {} 플랜의 {} 지출을 삭제.", userId, expense.getPlanId(), expense.getId());
-        validateExpenseDeletion(userId, planMembers);
+        validateExpenseDeletion(userId, planMembers, expense.getPlanId(), expense.getId());
         expense.delete();
     }
 
-    private void validateExpenseDeletion(UUID userId, List<PlanMember> planMembers) {
-        if (!expenseAuthorizationService.isOwnerOrMember(userId, planMembers)){
+    private void validateExpenseDeletion(UUID userId, List<PlanMember> planMembers, UUID planId, UUID expenseId) {
+        if (!expenseAuthorizationService.isOwnerOrMember(userId, planMembers)) {
+            log.info("{} 유저는 {} 플랜의 {} 지출을 삭제하지 못합니다.", userId, planId, expenseId);
             throw new AccessDeniedException("해당 리소스에 접근 할 권한이 없습니다.");
         }
     }

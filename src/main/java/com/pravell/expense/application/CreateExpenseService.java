@@ -24,8 +24,10 @@ public class CreateExpenseService {
     @Transactional
     public UUID create(UUID userId, UUID planId, CreateExpenseApplicationRequest request,
                        List<PlanMember> planMembers) {
-        validateCreateExpense(userId, planMembers);
-        return saveExpense(userId, planId, request);
+        validateCreateExpense(userId, planMembers, planId);
+        UUID expenseId = saveExpense(userId, planId, request);
+        log.info("{} 유저가 {} 플랜에 {} 지출 추가.", userId, planId, expenseId);
+        return expenseId;
     }
 
     private UUID saveExpense(UUID userId, UUID planId, CreateExpenseApplicationRequest request) {
@@ -35,8 +37,9 @@ public class CreateExpenseService {
         return expense.getId();
     }
 
-    private void validateCreateExpense(UUID userId, List<PlanMember> planMembers) {
+    private void validateCreateExpense(UUID userId, List<PlanMember> planMembers, UUID planId) {
         if (!expenseAuthorizationService.isOwnerOrMember(userId, planMembers)) {
+            log.info("{} 유저는 {} 플랜에 지출을 추가할 수 없습니다.", userId, planId);
             throw new AccessDeniedException("해당 리소스에 접근 할 권한이 없습니다.");
         }
     }
