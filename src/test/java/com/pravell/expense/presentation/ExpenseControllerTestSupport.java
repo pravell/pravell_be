@@ -87,7 +87,7 @@ public abstract class ExpenseControllerTestSupport extends ControllerTestSupport
 
     protected Expense getExpense(String title, String description, UUID planId, UUID createdBy, UUID paidByUserId,
                                  LocalDateTime spentAt) {
-        return getExpense(title, description, planId, createdBy, planId, spentAt, false);
+        return getExpense(title, description, planId, createdBy, paidByUserId, spentAt, false);
     }
 
     protected Expense getExpense(String title, String description, UUID planId, UUID createdBy, UUID paidByUserId,
