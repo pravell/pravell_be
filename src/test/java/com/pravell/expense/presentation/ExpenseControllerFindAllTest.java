@@ -78,10 +78,10 @@ class ExpenseControllerFindAllTest extends ExpenseControllerTestSupport {
         });
 
         assertThat(expenses).hasSize(2)
-                .extracting("title", "description", "paidByUserId")
+                .extracting("expenseId", "title", "description", "paidByUserId")
                 .containsExactlyInAnyOrder(
-                        tuple(expense1.getTitle(), expense1.getDescription(), expense1.getPaidByUserId()),
-                        tuple(expense2.getTitle(), expense2.getDescription(), expense2.getPaidByUserId())
+                        tuple(expense1.getId(), expense1.getTitle(), expense1.getDescription(), expense1.getPaidByUserId()),
+                        tuple(expense2.getId(), expense2.getTitle(), expense2.getDescription(), expense2.getPaidByUserId())
                 );
     }
 
