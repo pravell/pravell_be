@@ -45,6 +45,15 @@ public class ExpenseFacade {
         return findExpenseService.findAll(planId, userId, members, from, to, paidByUserId);
     }
 
+    public ExpenseResponse getExpense(UUID userId, UUID expenseId) {
+        userService.findUserById(userId);
+
+        Expense expense = expenseService.findExpense(expenseId);
+        List<PlanMember> members = getMembers(expense.getPlanId());
+
+        return findExpenseService.find(expense, members, userId);
+    }
+
     public void deleteExpense(UUID userId, UUID expenseId) {
         userService.findUserById(userId);
 

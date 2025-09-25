@@ -82,4 +82,11 @@ public class ExpenseController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/expenses/{expenseId}")
+    public ResponseEntity<ExpenseResponse> getExpense(@RequestHeader("Authorization") String header,
+                                                      @PathVariable UUID expenseId){
+        UUID userId = commonJwtUtil.getUserIdFromToken(header);
+        return ResponseEntity.ok(expenseFacade.getExpense(userId, expenseId));
+    }
+
 }

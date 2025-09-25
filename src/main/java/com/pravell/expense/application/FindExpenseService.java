@@ -33,6 +33,13 @@ public class FindExpenseService {
         return getExpenseResponses(expenses, planMembers);
     }
 
+    @Transactional(readOnly = true)
+    public ExpenseResponse find(Expense expense, List<PlanMember> planMembers, UUID userId) {
+        log.info("{} 유저가 {} 플랜의 {} 지출 내역을 조회.", userId, expense.getPlanId(), expense.getId());
+        validateFindExpenses(userId, planMembers, expense.getPlanId());
+        return getExpenseResponse(expense, planMembers);
+    }
+
     private void validateFindExpenses(UUID userId, List<PlanMember> planMembers, UUID planId) {
         if (!expenseAuthorizationService.isOwnerOrMember(userId, planMembers)) {
             log.info("{} 유저는 {} 플랜의 지출을 조회하지 못합니다.", userId, planId);
@@ -56,6 +63,19 @@ public class FindExpenseService {
                 .toList();
     }
 
+    private ExpenseResponse getExpenseResponse(Expense expense, List<PlanMember> planMembers) {
+        Map<UUID, String> idToNickname = getUuidStringMap(planMembers);
+
+        return ExpenseResponse.builder()
+                .title(expense.getTitle())
+                .amount(expense.getAmount())
+                .paidByUserId(expense.getPaidByUserId())
+                .spentAt(expense.getSpentAt())
+                .description(expense.getDescription())
+                .paidByUserNickname(idToNickname.getOrDefault(expense.getPaidByUserId(), "플랜에 속하지 않는 유저"))
+                .build();
+    }
+
     private Map<UUID, String> getUuidStringMap(List<PlanMember> planMembers) {
         return planMembers.stream()
                 .filter(pm -> pm.getMemberId() != null)
@@ -65,5 +85,4 @@ public class FindExpenseService {
                         (oldV, newV) -> oldV
                 ));
     }
-
 }
